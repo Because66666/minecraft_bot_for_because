@@ -149,11 +149,8 @@ python server.py
 
 #### 机器人命令
 游戏内可使用以下命令：
-- `!help` - 显示帮助信息
-- `!status` - 查看机器人状态
-- `!sleep` - 让机器人睡觉
-- `!transport <location>` - 传送到指定位置
-- `@AI <消息>` - 与AI进行对话
+- `/tpa <bot_name>` - 承接传送
+- `/whisper <bot_name> <消息>` - 与AI进行对话
 - 关键词触发 - 发送特定关键词触发彩蛋功能
 
 ## 项目结构

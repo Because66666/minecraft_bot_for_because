@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Bot - 功能丰富的游戏机器人</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#34C759', // Minecraft绿色调保持不变作为强调色
+                        secondary: '#F8F9FA', // 浅灰色作为次要背景
+                        accent: '#FF9500',
+                        dark: '#343A40', // 深色文字
+                        light: '#FFFFFF' // 白色作为主要背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .card-hover {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+        }
+    </style>
+</head>
+<body class="bg-light font-inter text-dark">
+    <!-- 导航栏 -->
+    <header class="bg-white text-dark shadow-sm fixed w-full z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-gamepad text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold">Minecraft Bot</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8"> <!-- 增大导航间距到8 -->
+                <a href="#features" class="hover:text-primary transition-colors">功能特性</a>
+                <a href="#tech" class="hover:text-primary transition-colors">技术架构</a>
+                <a href="#install" class="hover:text-primary transition-colors">安装配置</a>
+                <a href="#usage" class="hover:text-primary transition-colors">使用方法</a>
+            </nav>
+            <button class="md:hidden text-dark focus:outline-none">
+                <i class="fa fa-bars text-xl"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="pt-24 pb-16 bg-gradient-to-br from-secondary to-light text-dark">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 text-shadow">Minecraft Bot for Because</h1>
+                <p class="text-xl opacity-90 mb-8">一个功能丰富的Minecraft机器人，集成了Kook聊天平台与智谱AI对话功能，提供游戏内外的互动体验。</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#install" class="bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-primary/30">
+                        开始使用
+                    </a>
+                    <a href="#features" class="bg-transparent border-2 border-dark hover:border-primary hover:text-primary font-semibold py-3 px-6 rounded-lg transition-all">
+                        了解更多
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 功能特性 -->
+    <section id="features" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">功能特性</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- 游戏机器人功能 -->
+                <div class="bg-gray-50 rounded-xl p-6 shadow-md card-hover">
+                    <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fa fa-robot text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">游戏机器人功能</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><i class="fa fa-check text-primary mr-2"></i>自动化操作</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>玩家监控</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>事件响应</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>智能聊天</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>定时任务</li>
+                    </ul>
+                </div>
+
+                <!-- Kook集成 -->
+                <div class="bg-gray-50 rounded-xl p-6 shadow-md card-hover">
+                    <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fa fa-comments text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Kook集成</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><i class="fa fa-check text-primary mr-2"></i>双向消息同步</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>实时通知推送</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>多频道管理</li>
+                    </ul>
+                </div>
+
+                <!-- Web界面 -->
+                <div class="bg-gray-50 rounded-xl p-6 shadow-md card-hover">
+                    <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fa fa-globe text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Web实时界面</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><i class="fa fa-check text-primary mr-2"></i>用户管理与认证</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>消息管理</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>日志查看</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>实时对话</li>
+                    </ul>
+                </div>
+
+                <!-- AI聊天 -->
+                <div class="bg-gray-50 rounded-xl p-6 shadow-md card-hover">
+                    <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fa fa-brain text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">AI聊天功能</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><i class="fa fa-check text-primary mr-2"></i>智谱AI集成</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>多用户会话</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>上下文记忆</li>
+                        <li><i class="fa fa-check text-primary mr-2"></i>角色扮演</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技术架构 -->
+    <section id="tech" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">技术架构</h2>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h3 class="text-xl font-semibold mb-6">核心组件</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="flex items-center p-3 border border-gray-100 rounded-lg">
+                            <i class="fa fa-gamepad text-primary mr-3"></i>
+                            <span>Minecraft Bot (mineflayer)</span>
+                        </div>
+                        <div class="flex items-center p-3 border border-gray-100 rounded-lg">
+                            <i class="fa fa-comment text-primary mr-3"></i>
+                            <span>Kook API</span>
+                        </div>
+                        <div class="flex items-center p-3 border border-gray-100 rounded-lg">
+                            <i class="fa fa-server text-primary mr-3"></i>
+                            <span>Flask Web Server</span>
+                        </div>
+                        <div class="flex items-center p-3 border border-gray-100 rounded-lg">
+                            <i class="fa fa-database text-primary mr-3"></i>
+                            <span>SQLAlchemy ORM</span>
+                        </div>
+                        <div class="flex items-center p-3 border border-gray-100 rounded-lg">
+                            <i class="fa fa-brain text-primary mr-3"></i>
+                            <span>智谱AI服务</span>
+                        </div>
+                        <div class="flex items-center p-3 border border-gray-100 rounded-lg">
+                            <i class="fa fa-exchange text-primary mr-3"></i>
+                            <span>Socket.IO</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 安装配置 -->
+    <section id="install" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">安装与配置</h2>
+            
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-gray-50 rounded-xl p-6 shadow-md mb-8">
+                    <h3 class="text-xl font-semibold mb-4">环境要求</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><i class="fa fa-angle-right text-primary mr-2"></i>Python 3.8+</li>
+                        <li><i class="fa fa-angle-right text-primary mr-2"></i>SQLite数据库</li>
+                        <li><i class="fa fa-angle-right text-primary mr-2"></i>Kook机器人Token（可选）</li>
+                        <li><i class="fa fa-angle-right text-primary mr-2"></i>智谱AI API密钥（可选）</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3">1. 克隆项目</h3>
+                        <div class="bg-gray-800 text-gray-200 p-4 rounded-lg overflow-x-auto">
+                            <code>git clone &lt;repository-url&gt;<br>cd mc_bot_for_github</code>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3">2. 安装依赖</h3>
+                        <div class="bg-gray-800 text-gray-200 p-4 rounded-lg overflow-x-auto">
+                            <code>pip install -r requirements.txt</code>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3">3. 配置环境变量</h3>
+                        <p class="mb-3 text-gray-600">将.env.example文件改为.env文件并配置必要参数</p>
+                        <div class="bg-gray-800 text-gray-200 p-4 rounded-lg overflow-x-auto text-sm">
+                            <code># 游戏连接配置<br>PLAYER: Minecraft玩家名<br>HOST: 服务器地址<br>PORT: 服务器端口<br><br># Kook配置<br>KOOK: Kook机器人Token<br><br># 智谱AI配置<br>ZHIPU_AI_API_KEY: 智谱AI密钥</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 使用方法 -->
+    <section id="usage" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">使用方法</h2>
+            
+            <div class="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center">
+                        <i class="fa fa-play-circle text-primary mr-2"></i>启动机器人
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-gray-600 mb-2">启动Minecraft机器人</p>
+                            <div class="bg-gray-800 text-gray-200 p-3 rounded-lg text-sm">
+                                <code>python mc.py</code>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 mb-2">启动Web服务器</p>
+                            <div class="bg-gray-800 text-gray-200 p-3 rounded-lg text-sm">
+                                <code>python server.py</code>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 mb-2">访问Web界面</p>
+                            <div class="bg-gray-800 text-gray-200 p-3 rounded-lg text-sm">
+                                <code>http://localhost:211</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center">
+                        <i class="fa fa-terminal text-primary mr-2"></i>常用命令
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex">
+                            <span class="font-mono bg-gray-100 px-2 py-1 rounded text-primary mr-3">/tpa (bot_name)</span>
+                            <span>承接传送</span>
+                        </li>
+                        <li class="flex">
+                            <span class="font-mono bg-gray-100 px-2 py-1 rounded text-primary mr-3">/whisper (bot_name) </span>
+                            <span>与AI进行对话</span>
+                        </li>
+                        <li class="flex">
+                            <span class="font-mono bg-gray-100 px-2 py-1 rounded text-primary mr-3">关键词触发</span>
+                            <span>发送特定关键词触发彩蛋功能</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-100 text-dark py-10">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fa fa-gamepad text-primary text-xl"></i>
+                        <h2 class="text-xl font-bold">Minecraft Bot for Because</h2>
+                    </div>
+                    <p class="text-gray-500">Because© 2025 开源项目，基于MIT许可证</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="https://github.com/Because66666/minecraft_bot_for_because" class="text-gray-500 hover:text-primary transition-colors">
+                        <i class="fa fa-github text-2xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('py-2', 'bg-white/95', 'backdrop-blur-sm', 'shadow');
+                header.classList.remove('py-3', 'shadow-sm');
+            } else {
+                header.classList.add('py-3', 'shadow-sm');
+                header.classList.remove('py-2', 'bg-white/95', 'backdrop-blur-sm', 'shadow');
+            }
+        });
+    </script>
+</body>
+</html>

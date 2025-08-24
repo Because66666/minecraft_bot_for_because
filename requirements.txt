@@ -1,88 +1,92 @@
 # Web框架和服务器
-Flask==2.3.3
+Flask==3.1.2
 Flask-Login==0.6.3
-Flask-SocketIO==5.3.6
-Flask-SQLAlchemy==3.0.5
+Flask-SocketIO==5.5.1
+Flask-SQLAlchemy==3.1.1
 
 # 数据库
-SQLAlchemy==2.0.23
-sqlite3
+SQLAlchemy==2.0.36
+# sqlite3  # Python内置模块
 
 # HTTP请求和API
-requests==2.31.0
-aiohttp==3.9.1
+requests==2.32.3
+aiohttp==3.11.16
 
+# 注意：以下是Python内置模块，无需安装
 # 异步编程
-asyncio
+# asyncio
 
 # 邮件发送
-smtplib
-email
+# smtplib
+# email
 
 # 图像处理
-Pillow==10.1.0
+Pillow==10.3.0
 
 # 日期时间处理
 python-dateutil==2.8.2
 
 # 环境变量管理
-python-dotenv==1.0.0
+python-dotenv==1.0.1
 
 # AI聊天
-zhipuai==2.0.1
+zhipuai==2.1.5.20250526
 
+# 注意：以下是Python内置模块，无需安装
 # 日志记录
-logging
+# logging
 
 # JSON处理
-json
+# json
 
 # 正则表达式
-re
+# re
 
+# 注意：以下是Python内置模块，无需安装
 # 系统相关
-os
-sys
-time
-random
+# os
+# sys
+# time
+# random
 
 # 线程和进程
-threading
+# threading
 
 # 文件操作
-shutil
-pathlib
+# shutil
+# pathlib
 
 # 网络相关
-socket
-urllib3==2.1.0
+# socket
+urllib3==2.3.0
 
 # 加密和安全
-hashlib
-secrets
+# hashlib
+# secrets
 
 # 数据序列化
-pickle
+# pickle
 
 # 配置文件处理
-configparser
+# configparser
 
 # 命令行参数解析
-argparse
+# argparse
 
 # 类型提示
-typing
-typing-extensions==4.8.0
+# typing
+typing-extensions==4.12.2
 
+# 注意：以下包仅用于开发和测试，生产环境不需要
 # 开发和调试
-pdb
-traceback
+# pdb
+# traceback
 
 # 测试
-pytest==7.4.3
-pytest-asyncio==0.21.1
+# pytest==7.4.4
+# pytest-asyncio 未安装
 
 # 代码格式化和检查
-black==23.11.0
-flake8==6.1.0
-mypy==1.7.1
+# black==24.4.2
+# flake8==7.0.0
+# mypy==1.10.0
