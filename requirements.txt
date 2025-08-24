@@ -1,0 +1,88 @@
+# Web框架和服务器
+Flask==2.3.3
+Flask-Login==0.6.3
+Flask-SocketIO==5.3.6
+Flask-SQLAlchemy==3.0.5
+
+# 数据库
+SQLAlchemy==2.0.23
+sqlite3
+
+# HTTP请求和API
+requests==2.31.0
+aiohttp==3.9.1
+
+# 异步编程
+asyncio
+
+# 邮件发送
+smtplib
+email
+
+# 图像处理
+Pillow==10.1.0
+
+# 日期时间处理
+python-dateutil==2.8.2
+
+# 环境变量管理
+python-dotenv==1.0.0
+
+# AI聊天
+zhipuai==2.0.1
+
+# 日志记录
+logging
+
+# JSON处理
+json
+
+# 正则表达式
+re
+
+# 系统相关
+os
+sys
+time
+random
+
+# 线程和进程
+threading
+
+# 文件操作
+shutil
+pathlib
+
+# 网络相关
+socket
+urllib3==2.1.0
+
+# 加密和安全
+hashlib
+secrets
+
+# 数据序列化
+pickle
+
+# 配置文件处理
+configparser
+
+# 命令行参数解析
+argparse
+
+# 类型提示
+typing
+typing-extensions==4.8.0
+
+# 开发和调试
+pdb
+traceback
+
+# 测试
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# 代码格式化和检查
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1

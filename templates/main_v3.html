@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记录界面</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style_v2.css' ) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/button.css' ) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/send.css' ) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/notyf.css' ) }}">
+</head>
+<body>
+
+
+<!--//消息展示 style="margin-bottom: 60px"-->
+<div class="bg-gray-100 p-4">
+    {% for log in logs %}
+    <div class="flex items-start space-x-2 mb-4" id="{{log.id}}"><span
+            class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full"><img
+            class="aspect-square h-full w-full" alt="User Avatar"
+            src="{{ url_for('static', filename= 'img/'+ log.img_path ) }}"></span>
+        <div class="flex flex-col space-y-1">
+            <div class="flex items-center space-x-2">
+                <span class="text-gray-500">{{ log.who_string }}</span>
+                <!--                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"-->
+                <!--                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"-->
+                <!--                     class="h-4 w-4 text-red-500">-->
+                <!--                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>-->
+                <!--                </svg>-->
+            </div>
+            <div class="bg-white p-2 rounded-md shadow-sm"><p>{{ log.log_string }}</p></div>
+            <span class="text-xs text-gray-400" style="display:none;">{{ log.t }}</span></div>
+    </div>
+    {% endfor %}
+</div>
+
+<ul class="wrapper scrollToBottomBtn">
+
+    <li class="icon black other_com"><a href="/common">
+        <span class="tooltip">切换</span>
+        <span class="label">☼</span></a></li>
+
+    {% if current_user.is_authenticated %}
+<!--退出账户按钮-->
+<li class="icon black logout">
+        <span class="tooltip">登出</span>
+        <span><svg viewBox="0 0 16 16" class="bi bi-chevron-double-left" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+  <path d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" fill-rule="evenodd"></path>
+  <path d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" fill-rule="evenodd"></path>
+</svg></span></li>
+    {% endif %}
+<!--向下滑动按钮-->
+    <li class="icon black down111">
+        <span class="tooltip">下滑</span>
+        <span><svg viewBox="0 0 16 16" class="bi bi-chevron-double-down" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+  <path d="M1.646 6.646a.5.5 0 0 1 .708 0L8 12.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" fill-rule="evenodd"></path>
+  <path d="M1.646 2.646a.5.5 0 0 1 .708 0L8 8.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" fill-rule="evenodd"></path>
+</svg></span>
+    </li>
+</ul>
+
+
+{% if current_user.is_authenticated %}
+<!--// 如果已经登录，显示发送按钮-->
+<div class="flex space-x-2"><input
+        class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+        id="messageInput">
+    <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-9 px-4 py-2 shrink-0"
+            id="sendMessageBtn">发送
+    </button>
+</div>
+{% else %}
+<!--// 如果未登录，则显示登录按钮-->
+<button class="login_button items-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 flex w-full justify-center rounded-md bg-primary py-2 px-4 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        type="submit" data-id="18" id="login_button">登录以发言
+</button>
+{% endif %}
+
+<script>
+    var max_log_id = {{ max_log_id }};
+    var min_log_id = {{ min_log_id }};
+</script>
+<script src="{{ url_for('static', filename= 'js/notyf.js' ) }}"></script>
+<script src="{{ url_for('static', filename= 'js/button.js' ) }}"></script>
+<script src="{{ url_for('static', filename= 'js/socket.js' ) }}"></script>
+<script src="{{ url_for('static', filename= 'js/message_v2.js' ) }}"></script>
+<script src="{{ url_for('static', filename= 'js/send.js' ) }}"></script>
+<script src="{{ url_for('static', filename= 'js/update_old_log.js' ) }}"></script>
+<script src="{{ url_for('static', filename= 'js/other_func.js' ) }}"></script>
+</body>
+</html>

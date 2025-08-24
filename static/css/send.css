@@ -1,0 +1,36 @@
+/* From Uiverse.io by Bodyhc */
+.search {
+  position: fixed; /* 使按钮固定在屏幕上 */
+  bottom: 20px; /* 距离底部的距离 */
+  left: 20px; /* 距离右侧的距离 */
+  z-index: 1000; /* 确保按钮在最顶层 */
+  width:80% /* 宽度 */
+}
+
+.search input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.search button[type="submit"] {
+  background-color: #4e99e9;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 0;
+  right: 0;
+  transition: .9s ease;
+}
+
+.search button[type="submit"]:hover {
+  transform: scale(1.1);
+  color: rgb(255, 255, 255);
+  background-color: blue;
+}

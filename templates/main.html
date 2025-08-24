@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'bootstrap.css' ) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'button.css' ) }}">
+    <style>
+        /* 添加 CSS 规则 */
+        .table tbody td {
+            font-size: 14px; /* 您可以调整这个值 */
+        }
+
+    </style>
+    <title>聊天查看器</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Because的聊天栏</h1>
+        <table id="logsTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>玩家名称</th>
+                    <th>内容</th>
+                </tr>
+            </thead>
+            <tbody id="logTableBody">
+            {% for log in logs %}
+                <tr>
+                    <td>{{ log.t }}</td>
+                    <td>{{ log.who_string }}</td>
+                    <td>{{ log.log_string }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<!--    <button id="scrollToBottomBtn" class="btn btn-primary scroll-to-bottom" onclick="scrollToBottom();">滑到底部</button>-->
+    <ul class="wrapper scrollToBottomBtn" >
+    <li class="icon black">
+        <span class="tooltip">Down</span>
+        <span><svg viewBox="0 0 16 16" class="bi bi-chevron-double-down" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+  <path d="M1.646 6.646a.5.5 0 0 1 .708 0L8 12.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" fill-rule="evenodd"></path>
+  <path d="M1.646 2.646a.5.5 0 0 1 .708 0L8 8.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" fill-rule="evenodd"></path>
+</svg></span>
+    </li></ul>
+
+    <script>
+        var max_log_id = {{ max_log_id }};
+    </script>
+    <script src="{{ url_for('static', filename= 'button.js' ) }}"></script>
+    <script src="{{ url_for('static', filename= 'socket.js' ) }}"></script>
+    <script src="{{ url_for('static', filename= 'message.js' ) }}">
+    </script>
+</body>
+</html>
