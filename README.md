@@ -63,7 +63,7 @@
 
 1. **克隆项目**
 ```bash
-git clone <repository-url>
+git clone https://github.com/Because66666/minecraft_bot_for_because
 cd mc_bot_for_github
 ```
 
