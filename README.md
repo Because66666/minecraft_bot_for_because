@@ -329,8 +329,6 @@ class CustomAIChat(ZhipuAIChat):
 
 如有问题或建议，请通过以下方式联系：
 - 创建 Issue
-- 发送邮件到项目维护者
-- 在Kook群组中讨论
 
 ## 重构日志
 
