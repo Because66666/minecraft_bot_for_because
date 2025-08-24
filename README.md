@@ -26,20 +26,24 @@
 - **消息发送**：通过Web界面发送消息到游戏，并且与游戏内玩家实时对话
 
 ### 🧠 AI聊天功能
-- **智谱AI集成**：使用智谱AI的GLM模型提供智能对话
+- **智谱AI集成**：使用智谱AI的GLM-4-Flash模型提供智能对话
 - **多用户会话**：支持多用户同时进行AI对话，独立会话管理
 - **上下文记忆**：维护对话上下文，提供连贯的聊天体验
 - **角色扮演**：内置系统提示词以实现自定义的角色设定
+- **容错处理**：AI服务异常时优雅降级，不影响其他功能
+- **参数验证**：严格的输入验证，防止无效请求导致程序崩溃
 
 ## 技术架构
 
 ### 核心组件
-- **Minecraft Bot**：基于mineflayer的游戏机器人
-- **Kook API**：与开黑啦平台的API集成
-- **Flask Web Server**：提供Web管理界面
-- **SQLAlchemy ORM**：数据库操作和管理
-- **智谱AI服务**：集成GLM模型提供AI对话功能
-- **Socket.IO**：实时双向通信
+- **Minecraft Bot**：基于Node.js mineflayer库的游戏机器人
+- **Kook API**：与开黑啦平台的REST API集成
+- **Flask Web Server**：提供Web管理界面和API服务
+- **SQLAlchemy ORM**：数据库操作和模型管理
+- **智谱AI服务**：集成GLM-4-Flash模型提供AI对话功能
+- **Socket.IO**：实现Web界面与后端的实时双向通信
+- **配置管理**：统一的环境变量和配置管理系统
+- **日志系统**：分类日志记录和错误追踪
 
 ### 数据库模型
 - **用户管理**：玩家信息、认证状态
@@ -51,9 +55,9 @@
 
 ### 环境要求
 - Python 3.8+
-- Node.js 16+
-- SQLite/MySQL数据库
-- Kook机器人Token
+- SQLite数据库
+- Kook机器人Token（可选）
+- 智谱AI API密钥（可选）
 
 ### 安装步骤
 
@@ -68,18 +72,45 @@ cd mc_bot_for_github
 pip install -r requirements.txt
 ```
 
-3. **安装Node.js依赖**
-```bash
-npm install
-```
+**主要依赖包：**
+- Flask 2.3.3 - Web框架
+- Flask-SocketIO 5.3.6 - 实时通信
+- SQLAlchemy 2.0.23 - 数据库ORM
+- zhipuai 2.0.1 - 智谱AI SDK
+- requests 2.31.0 - HTTP请求
+- python-dotenv 1.0.0 - 环境变量管理
 
-4. **配置环境变量**
+3. **配置环境变量**
 将`.env.example`文件改为`.env`文件以启用环境变量配置。
 
 **重要配置项说明：**
+
+**游戏连接配置：**
+- `PLAYER`: Minecraft玩家名
+- `HOST`: 服务器地址（默认：127.0.0.1）
+- `PORT`: 服务器端口（默认：25565）
+- `AUTH`: 是否启用正版验证（True/False）
+- `SERVER_PASSWORD`: 服务器登录密码
+
+**Kook机器人配置：**
+- `KOOK`: Kook机器人Token（必需）
+- `KOOK_MAIN_CHANNEL`: 主频道ID
+- `KOOK_AI_CHANNEL`: AI对话频道ID
+
+**智谱AI配置：**
 - `ZHIPU_AI_API_KEY`: 智谱AI的API密钥（必需）
 - `ZHIPU_AI_MODEL`: 使用的模型名称（默认：glm-4-flash）
 - `AI_SESSION_TIMEOUT`: AI会话超时时间（秒，默认：180）
+- `SYSTEM_PROMPT`: AI系统提示词
+
+**邮件服务配置：**
+- `MAIL_USER`: 邮箱账号
+- `MAIL_PASS`: 邮箱密码或授权码
+- `MAIL_HOST`: SMTP服务器（默认：smtp.qq.com）
+- `MAIL_PORT`: SMTP端口（默认：465）
+
+**Flask应用配置：**
+- `SECRET_KEY`: Flask应用密钥
 
 **获取智谱AI API密钥：**
 1. 访问 [智谱AI开放平台](https://open.bigmodel.cn/)
@@ -122,6 +153,8 @@ python server.py
 - `!status` - 查看机器人状态
 - `!sleep` - 让机器人睡觉
 - `!transport <location>` - 传送到指定位置
+- `@AI <消息>` - 与AI进行对话
+- 关键词触发 - 发送特定关键词触发彩蛋功能
 
 ## 项目结构
 
@@ -129,24 +162,34 @@ python server.py
 mc_bot_for_github/
 ├── mc.py                 # Minecraft机器人主程序
 ├── server.py             # Flask Web服务器
-├── timetable_info.py     # 时间表信息模块
-├── email_utils.py        # 邮件工具模块
+├── .env                  # 环境变量配置文件
+├── .env.example          # 环境变量配置示例
+├── .gitignore            # Git忽略文件配置
 ├── functions/            # 核心功能模块
 │   ├── __init__.py       # 模块导出接口
 │   ├── config.py         # 配置管理
 │   ├── database.py       # 数据库模型和操作
 │   ├── my_logger.py      # 日志系统
-│   ├── tools.py          # Flask应用和工具
+│   ├── tools.py          # Flask应用和Socket.IO
 │   ├── utils.py          # 系统工具和游戏逻辑
 │   ├── kook_api.py       # Kook API封装
 │   ├── communicate_by_ai.py # AI通信模块
-│   └── keyword_in_communication.py # 关键词处理
-├── templates/            # HTML模板
+│   ├── keyword_in_communication.py # 关键词处理
+│   └── timetable_info.py # 时间表信息模块
+├── templates/            # HTML模板文件
+│   ├── error.html        # 错误页面
+│   ├── for_because.html  # 主页面
+│   └── for_because_v2.html # 主页面v2
 ├── static/              # 静态资源
 │   ├── css/             # 样式文件
 │   ├── js/              # JavaScript文件
-│   └── img/             # 图片资源
-├── logs/                # 日志文件
+│   └── img/             # 图片资源（玩家头像）
+├── logs/                # 日志文件目录
+│   ├── ai.txt           # AI对话日志
+│   ├── communication.txt # 通信日志
+│   ├── error.txt        # 错误日志
+│   ├── log.txt          # 主日志
+│   └── sending.txt      # 消息发送日志
 ├── requirements.txt     # Python依赖
 └── README.md           # 项目文档
 ```
@@ -156,19 +199,23 @@ mc_bot_for_github/
 ### 代码结构
 
 #### 主要类和模块
-- **BotEventHandler**：处理Minecraft游戏事件
-- **GameUtils**：游戏相关的工具函数
-- **MessageManager**：消息管理和AI集成
-- **WebServer**：Flask Web应用封装
-- **DatabaseManager**：数据库操作管理
-- **KookAPI**：Kook平台API封装
-- **ZhipuAIChat**：智谱AI聊天管理
+- **Config**：统一配置管理类
+- **DatabaseManager**：数据库连接和操作管理
+- **KookAPI**：Kook平台API封装和消息发送
+- **ZhipuAIChat**：智谱AI聊天管理和对话处理
+- **GeometryUtils/SystemUtils**：几何计算和系统工具
+- **EasterEggManager**：关键词彩蛋管理
+- **EmailService**：邮件发送服务
+- **Logger系统**：分类日志记录（通信、AI、发送、错误）
 
 #### 数据库模型
-- **RIAPlayers**：玩家信息
-- **RIAMsgSend**：消息发送记录
-- **RIALogInfo/RIALogCommon**：日志记录
-- **RIAAiHistory**：AI对话历史
+- **RIAPlayers**：玩家信息和认证状态
+- **RIAMsgSend**：消息发送队列
+- **RIALogin**：玩家登录记录
+- **RIAOnline**：在线状态记录
+- **RIALogInfo/RIALogCommon**：系统日志记录
+- **UserRecord**：用户注册和认证记录
+- **CreativeLogin**：创造服务器登录记录
 
 ### 扩展开发
 
@@ -201,22 +248,25 @@ class WebServer:
 #### 扩展AI功能
 ```python
 # 在communicate_by_ai.py中扩展AI功能
-from communicate_by_ai import get_ai_chat_instance
+from functions.communicate_by_ai import get_ai_chat_instance, main_ai
 
-def custom_ai_handler(username, message, context):
-    # 获取AI聊天实例
-    ai_chat = get_ai_chat_instance()
-    
-    # 自定义AI处理逻辑
-    response, updated_cache = ai_chat.chat(username, message, context)
-    return response, updated_cache
+def custom_ai_handler(username, message, caches=None):
+    """自定义AI处理函数"""
+    try:
+        # 使用main_ai函数进行AI对话
+        response = main_ai(username, message, caches)
+        return response
+    except Exception as e:
+        logger.error(f'AI处理失败: {e}')
+        return "抱歉，AI服务暂时不可用"
 
-# 自定义AI模型配置
+# 自定义AI配置
 class CustomAIChat(ZhipuAIChat):
     def __init__(self):
         super().__init__()
-        self.model = 'glm-4'  # 使用更高级的模型
-        self.temperature = 0.8  # 调整创造性
+        # 可以通过环境变量自定义模型
+        self.model = os.getenv('ZHIPU_AI_MODEL', 'glm-4-flash')
+        self.temperature = 0.7  # 调整创造性
 ```
 
 ## 故障排除
@@ -243,14 +293,25 @@ class CustomAIChat(ZhipuAIChat):
    - 确认数据库权限
    - 验证连接字符串格式
 
-5. **MC登录时遇到错误out of index**
-   - 原因是mineflayer模块在登录高版本的时候，如果区块内存在非橡木木牌会导致报错。
-   - 解决：在`mc.py`文件中，语句`self.mineflayer = require("mineflayer", "latest")`中的`latest`改为低版本。但是需要服务器支持viaversion。
+5. **AI对话功能异常**
+   - 检查智谱AI API密钥是否正确配置
+   - 确认网络连接正常
+   - 查看AI相关日志文件
+
+6. **参数缺失导致程序崩溃**
+   - 程序已优化错误处理，缺少必要参数时会记录日志而不崩溃
+   - 检查日志文件中的警告和错误信息
+   - 确保所有必需的环境变量都已正确配置
 
 ### 日志查看
-- **应用日志**：查看控制台输出或日志文件
-- **Web日志**：通过Web界面的日志页面查看
-- **数据库日志**：检查数据库操作记录
+项目采用分类日志系统，便于问题定位：
+- **主日志** (`logs/log.txt`)：系统主要运行日志
+- **通信日志** (`logs/communication.txt`)：游戏内外消息通信记录
+- **AI日志** (`logs/ai.txt`)：AI对话和处理记录
+- **发送日志** (`logs/sending.txt`)：消息发送状态记录
+- **错误日志** (`logs/error.txt`)：系统错误和异常记录
+- **控制台输出**：实时查看程序运行状态
+- **Web界面**：通过Web管理界面查看日志
 
 ## 贡献指南
 
@@ -271,14 +332,17 @@ class CustomAIChat(ZhipuAIChat):
 - 发送邮件到项目维护者
 - 在Kook群组中讨论
 
-## 更新日志
+## 重构日志
 
 ### v2.0.0 (最新)
-- 完全重构代码架构
-- 改进错误处理和日志记录
-- 优化数据库操作
-- 增强Web界面功能
-- 提升系统稳定性
+- 完全重构代码架构，模块化设计
+- 改进错误处理和日志记录系统
+- 优化数据库操作和连接管理
+- 增强Web界面功能和用户体验
+- 集成智谱AI GLM模型提供智能对话
+- 添加参数验证和容错处理机制
+- 提升系统稳定性和可维护性
+- 统一配置管理和环境变量处理
 
 ### v1.0.0
 - 初始版本发布
