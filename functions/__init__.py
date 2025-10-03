@@ -9,7 +9,6 @@ from .config import config
 # Database management
 from .database import (
     DatabaseManager,
-    RIALogin, 
     RIAOnline, 
     RIALogInfo, 
     RIAMsgSend, 
@@ -47,7 +46,6 @@ __all__ = [
     
     # Database
     'DatabaseManager',
-    'RIALogin', 
     'RIAOnline',
     'RIALogInfo',
     'RIAMsgSend',

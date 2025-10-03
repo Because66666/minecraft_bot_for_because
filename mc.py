@@ -7,6 +7,8 @@ import socket
 import sys
 import time
 from typing import Dict, Any
+import traceback
+import requests
 from apscheduler.schedulers.blocking import BlockingScheduler
 from javascript import require, On
 import importlib
@@ -14,7 +16,7 @@ import importlib
 # 导入新创建的模块
 from functions import (
     config,
-    DatabaseManager, RIALogin, RIAOnline, RIALogInfo, RIAMsgSend, RIALogCommon,
+    DatabaseManager, RIAOnline, RIALogInfo, RIAMsgSend, RIALogCommon, db_service,
     GeometryUtils, SystemUtils, EasterEggManager,
     main_ai,
     keys, keys_set,
@@ -50,7 +52,6 @@ logger.info(f'数据库连接自检：\nRIA数据库：{db_manager.ria_db_exists
 
 # 彩蛋管理器已移动到utils.py模块
 easter_egg_manager = EasterEggManager()
-
 
 # 全局变量声明（将在initialize_bot函数中初始化）
 mc_bot = None
@@ -224,6 +225,7 @@ class GameUtils:
         # 退出机器人
         try:
             bot.quit()
+            mc_bot.cleanup_resources()
         except Exception as e:
             logger.error(f'bot.quit()失败: {e}')
 
@@ -234,7 +236,7 @@ class GameUtils:
             logger.error(f"关闭调度器失败: {e}")
 
         # 使用SystemUtils安全退出
-        SystemUtils.safe_exit()
+        SystemUtils.safe_exit(reason_str)
 
     @staticmethod
     def check_entity_status() -> bool:
@@ -278,11 +280,8 @@ class GameUtils:
                 num = random.randint(1, 100)
                 bot.look(num, 0)
                 players = bot.players.valueOf()
-                logger.info(f'当前在线玩家：{players.keys()}')
+                logger.info(f'当前在线玩家数量：{len(players.keys())}')
 
-                # 使用DatabaseService的方法记录在线玩家
-                for player_name, data_info in players.items():
-                    db_service.record_online_player(player_name, data_info)
 
             except Exception as e:
                 logger.error(f'记录在线玩家信息失败: {e}')
@@ -292,6 +291,24 @@ class GameUtils:
         except Exception as e:
             logger.error(f'检查在线状态失败: {e}')
             return False
+
+    @staticmethod
+    def fetch_online_player_by_map():
+        """通过地图API获取当前在线玩家"""
+        if not config.MAP_API:  # 如果没有配置地图API，则不进行操作
+            return
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'}
+        query = requests.get(config.MAP_API, headers=headers)
+        if query.status_code != 200:
+            return
+        players = query.json().get('players', [])
+        # 使用DatabaseService的方法记录在线玩家
+        for player_body in players:
+            player_name = player_body.get('account', '')
+            record_ = ['armor', 'x', 'y', 'z', 'health']
+            data = [player_body.get(key, '') for key in record_]
+            db_service.record_online_player(player_name, data)
 
 
 # noinspection PyUnresolvedReferences,PyTypeChecker
@@ -446,9 +463,6 @@ class BotEventHandler:
 
             logger.info(f"{username} 加入了RIA")
 
-            # 使用DatabaseService的方法记录玩家登录
-            db_service.record_player_login(username)
-
             join_message = f"{username} 加入了RIA-零洲。"
             kook_api.send_message(config.KOOK_MAIN_CHANNEL, join_message)
             logger.info(join_message)
@@ -470,15 +484,6 @@ class BotEventHandler:
                 return
 
             logger.info(f"{username} 离开了RIA")
-
-            # 使用DatabaseService的方法记录玩家登出并获取在线时长
-            duration_str = db_service.record_player_logout(username)
-
-            # 如果在线时间超过1分钟，发送通知
-            if duration_str:
-                leave_message = f"{username} 离开了RIA，在线时长 {duration_str}"
-                kook_api.send_message(config.KOOK_MAIN_CHANNEL, leave_message)
-                logger.info(leave_message)
 
         except Exception as e:
             logger.error(f"处理玩家离开事件失败: {e}")
@@ -637,6 +642,12 @@ class BotEventHandler:
             end_message = f"程序结束，参数: {args}"
             logger.info(end_message)
             print(end_message)
+            
+            # 主动关闭调度器，确保程序能够退出
+            if timetable_manager and timetable_manager.scheduler.running:
+                logger.info('正在关闭调度器...')
+                timetable_manager.scheduler.shutdown(wait=False)
+                
         except Exception as e:
             logger.error(f"处理程序结束事件失败: {e}")
 
@@ -833,7 +844,6 @@ timetable_manager = None
 # 几何计算工具类函数已移动到utils.py模块中的GeometryUtils类
 
 
-
 class MinecraftBot:
     """Minecraft机器人管理类"""
 
@@ -871,7 +881,7 @@ class MinecraftBot:
         if auth == 'True':
             bot_config.update({
                 'auth': 'microsoft',
-                'version': '1.18.2'
+                'version': '1.12.2'
             })
 
         self.bot = self.mineflayer.createBot(bot_config)
@@ -891,6 +901,62 @@ class MinecraftBot:
     def get_start_time(self):
         """获取启动时间"""
         return self.start_time
+    
+    def cleanup_resources(self):
+        """清理Minecraft机器人资源
+        
+        清理包括：
+        - 断开机器人连接
+        - 清理JavaScript线程和模块
+        - 重置相关资源引用
+        """
+        try:
+            logger.info('开始清理Minecraft机器人资源...')
+            
+            # 1. 断开机器人连接
+            if hasattr(self, 'bot') and self.bot:
+                try:
+                    # 尝试优雅断开连接
+                    if hasattr(self.bot, 'quit'):
+                        self.bot.quit()
+                        logger.info('机器人连接已断开')
+                except Exception as e:
+                    logger.error(f'断开机器人连接失败: {e}')
+            
+            # 2. 清理JavaScript线程和模块
+            if hasattr(self, 'js_threads') and self.js_threads:
+                for js_module in self.js_threads:
+                    try:
+                        # 尝试清理JavaScript模块
+                        if hasattr(js_module, 'close'):
+                            js_module.close()
+                        elif hasattr(js_module, 'destroy'):
+                            js_module.destroy()
+                        elif hasattr(js_module, 'cleanup'):
+                            js_module.cleanup()
+                    except Exception as e:
+                        logger.error(f'清理JavaScript模块失败: {e}')
+                
+                # 清空js_threads列表
+                self.js_threads.clear()
+                logger.info('JavaScript线程已清理')
+            
+            # 3. 重置相关资源引用
+            if hasattr(self, 'mineflayer'):
+                self.mineflayer = None
+            if hasattr(self, 'Vec3'):
+                self.Vec3 = None
+            if hasattr(self, 'bot'):
+                self.bot = None
+            if hasattr(self, 'blocks'):
+                self.blocks = None
+            if hasattr(self, 'entities'):
+                self.entities = None
+            
+            logger.info('Minecraft机器人资源清理完成')
+            
+        except Exception as e:
+            logger.error(f'清理Minecraft机器人资源时发生错误: {e}')
 
 
 def register_event_handlers():
@@ -1016,7 +1082,6 @@ class MessageManager:
             logger.error(f'处理待发送消息失败: {e}')
 
 
-
 # 初始化全局变量
 minecraft_bot = None
 timetable_manager = None
@@ -1048,6 +1113,7 @@ def initialize_bot():
 
     except Exception as e:
         logger.error(f'机器人初始化失败: {e}')
+        traceback.print_exc()
         raise
 
 
@@ -1061,7 +1127,6 @@ def setup_scheduled_tasks():
             hour='*',
             id='check_players'
         )
-
 
         timetable_manager.scheduler.add_job(
             MessageManager.check_bot_status,
@@ -1079,6 +1144,13 @@ def setup_scheduled_tasks():
             max_instances=1
         )
 
+        timetable_manager.scheduler.add_job(
+            GameUtils.fetch_online_player_by_map,
+            'cron',
+            hour='*',
+            id='record_online_players'
+        )
+
         # 可选的传送任务（注释掉，可根据需要启用）
         # timetable_manager.scheduler.add_job(
         #     GameUtils.transport_to_iron_farm,
@@ -1087,13 +1159,13 @@ def setup_scheduled_tasks():
         #     id='to_iron'
         # )
         # 
-        # timetable_manager.scheduler.add_job(
-        #     GameUtils.transport_to_main,
-        #     'cron',
-        #     hour=14,
-        #     id='to_main'
-        # )
-        # 
+        timetable_manager.scheduler.add_job(
+            BotEventHandler.transport_to_main,
+            'cron',
+            hour=7,
+            id='to_main'
+        )
+
         # timetable_manager.scheduler.add_job(
         #     GameUtils.transport_to_community,
         #     'cron',
@@ -1146,9 +1218,11 @@ def cleanup():
 
         # 停止调度器
         if timetable_manager and timetable_manager.scheduler.running:
-            timetable_manager.scheduler.shutdown()
-
-        logger.info('程序结束...特征编码：naisncxai9euqwuenasod')
+            logger.info('正在停止调度器...')
+            timetable_manager.scheduler.shutdown(wait=False)
+        GameUtils.exit_game('程序结束。')
+        
+        logger.info('程序结束...')
 
     except Exception as e:
         logger.error(f'清理资源时出错: {e}')

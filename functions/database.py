@@ -4,6 +4,7 @@
 """
 
 import datetime
+import threading
 from typing import List, Optional
 from sqlalchemy import Column, DateTime, Text, Integer, JSON, create_engine, desc
 from sqlalchemy.orm import declarative_base, Session
@@ -41,8 +42,9 @@ class DatabaseManager:
     def _check_database_connection(self, engine):
         """检查数据库连接状态"""
         try:
+            from sqlalchemy import text
             with engine.connect() as conn:
-                conn.execute('SELECT 1')
+                conn.execute(text('SELECT 1'))
             return True
         except Exception:
             return False
@@ -131,15 +133,6 @@ class RIAMsgSend(Base):
     text = Column(Text, comment='要发送的内容')
 
 
-class RIALogin(Base):
-    """RIA登录记录模型"""
-    __tablename__ = 'RIA_login'
-    
-    id = Column(Integer, primary_key=True, unique=True, nullable=False)
-    player_name = Column(Text, comment='玩家名字')
-    login_time = Column(DateTime, comment='登录时间')
-    logout_time = Column(DateTime, comment='登出时间')
-
 
 class RIAOnline(Base):
     """RIA在线人员记录模型"""
@@ -171,9 +164,10 @@ class RIAPlayers(Base, UserMixin):
 
 class DatabaseService:
     """数据库服务类"""
-    
     def __init__(self, db_manager: DatabaseManager):
         self.db_manager = db_manager
+        self.online_player_set = set()
+        self.lock = threading.Lock()
     
     def add_chat_log(self, username: str, message: str) -> None:
         """添加聊天日志
@@ -272,79 +266,7 @@ class DatabaseService:
         except Exception as e:
             print(f"添加发送消息失败: {e}")
     
-    def record_player_login(self, player_name: str) -> None:
-        """记录玩家登录
-        
-        Args:
-            player_name: 玩家名字
-        """
-        try:
-            # 使用独立session检查是否已有未完成的登录记录
-            from sqlalchemy.orm import Session
-            
-            temp_session = Session(bind=engine)
-            try:
-                existing = (temp_session.query(RIALogin)
-                           .filter(RIALogin.player_name == player_name,
-                                  RIALogin.logout_time == None)
-                           .order_by(RIALogin.login_time.desc())
-                           .first())
-                
-                if not existing:
-                    login_record = RIALogin(
-                        player_name=player_name,
-                        login_time=datetime.datetime.now()
-                    )
-                    # 使用DatabaseManager的安全方法
-                    self.db_manager.add_and_commit(login_record)
-            finally:
-                temp_session.close()
-        except Exception as e:
-            print(f"记录玩家登录失败: {e}")
-    
-    def record_player_logout(self, player_name: str) -> Optional[str]:
-        """记录玩家登出
-        
-        Args:
-            player_name: 玩家名字
-            
-        Returns:
-            在线时长字符串，如果记录失败则返回None
-        """
-        try:
-            # 使用独立session查找和更新登录记录
-            from sqlalchemy.orm import Session
-            
-            temp_session = Session(bind=engine)
-            try:
-                login_record = (temp_session.query(RIALogin)
-                               .filter(RIALogin.player_name == player_name)
-                               .order_by(RIALogin.login_time.desc())
-                               .first())
-                
-                if login_record:
-                    now = datetime.datetime.now()
-                    login_record.logout_time = now
-                    
-                    # 计算在线时长
-                    duration = now - login_record.login_time
-                    if duration <= datetime.timedelta(seconds=60):
-                        temp_session.commit()
-                        return None
-                    
-                    hours = duration.seconds // 3600
-                    minutes = (duration.seconds // 60) % 60
-                    duration_str = f"{hours}小时{minutes}分钟"
-                    
-                    temp_session.commit()
-                    return duration_str
-            finally:
-                temp_session.close()
-        except Exception as e:
-            print(f"记录玩家登出失败: {e}")
-        
-        return None
-    
+
     def record_online_player(self, player_name: str, data_info: dict) -> None:
         """记录在线玩家信息
         

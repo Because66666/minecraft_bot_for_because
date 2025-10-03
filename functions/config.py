@@ -32,6 +32,7 @@ class Config:
     MINECRAFT_USERNAME = os.getenv("PLAYER")
     MINECRAFT_AUTH = os.getenv("AUTH") == 'True'
     SERVER_PASSWORD = os.getenv('SERVER_PASSWORD')
+    MAP_API = os.getenv('MAP_API')
     
     # KOOK配置
     KOOK_TOKEN = os.getenv('KOOK')
