@@ -1,3 +1,10 @@
 logs/
 ria.db
 .env
+__pycache__/
+.vscode/
+.idea/
+.gitignore
+.git/
+.DS_Store
+functions/__pycache__/

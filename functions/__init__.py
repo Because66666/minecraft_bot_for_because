@@ -8,8 +8,7 @@ from .config import config
 
 # Database management
 from .database import (
-    DatabaseManager, 
-    CreativeLogin, 
+    DatabaseManager,
     RIALogin, 
     RIAOnline, 
     RIALogInfo, 
@@ -17,7 +16,8 @@ from .database import (
     RIALogCommon,
     UserRecord,
     RIAPlayers,
-    create_tables
+    create_tables,
+    db_service
 )
 
 # Utility functions
@@ -47,7 +47,6 @@ __all__ = [
     
     # Database
     'DatabaseManager',
-    'CreativeLogin',
     'RIALogin', 
     'RIAOnline',
     'RIALogInfo',
@@ -56,11 +55,13 @@ __all__ = [
     'UserRecord',
     'RIAPlayers',
     'create_tables',
+    'db_service',
     
     # Utils
     'GeometryUtils',
     'SystemUtils', 
     'EasterEggManager',
+    'EmailService',
     
     # AI
     'main_ai',

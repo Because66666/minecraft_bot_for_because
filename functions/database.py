@@ -26,16 +26,7 @@ engine = create_engine(
         'check_same_thread': False
     }
 )
-creative_engine = create_engine(
-    f'sqlite:///{config.CREATIVE_DB_PATH}',
-    pool_timeout=20,
-    pool_recycle=-1,
-    pool_pre_ping=True,
-    connect_args={
-        'timeout': 30,
-        'check_same_thread': False
-    }
-)
+
 
 
 class DatabaseManager:
@@ -43,11 +34,9 @@ class DatabaseManager:
     
     def __init__(self):
         self.session = Session(bind=engine)
-        self.creative_session = Session(bind=creative_engine)
         
         # 数据库连接状态检查
         self.ria_db_exists = self._check_database_connection(engine)
-        self.creative_db_exists = self._check_database_connection(creative_engine)
     
     def _check_database_connection(self, engine):
         """检查数据库连接状态"""
@@ -89,7 +78,6 @@ class DatabaseManager:
         """关闭所有数据库会话"""
         try:
             self.session.close()
-            self.creative_session.close()
         except Exception as e:
             print(f"关闭数据库会话时出错: {e}")
     
@@ -162,15 +150,6 @@ class RIAOnline(Base):
     DataInfo = Column(JSON, comment='数据信息')
     t = Column(DateTime, comment='记录时间')
 
-
-class CreativeLogin(Base):
-    """创造服登录记录模型"""
-    __tablename__ = 'creative_login'
-    
-    id = Column(Integer, primary_key=True, unique=True, nullable=False)
-    player_name = Column(Text, comment='玩家名字')
-    login_time = Column(DateTime, comment='登录时间')
-    logout_time = Column(DateTime, comment='登出时间')
 
 
 class UserRecord(Base, UserMixin):
@@ -365,6 +344,67 @@ class DatabaseService:
             print(f"记录玩家登出失败: {e}")
         
         return None
+    
+    def record_online_player(self, player_name: str, data_info: dict) -> None:
+        """记录在线玩家信息
+        
+        Args:
+            player_name: 玩家名字
+            data_info: 玩家数据信息
+        """
+        try:
+            online_record = RIAOnline(
+                player_name=player_name,
+                DataInfo=data_info,
+                t=datetime.datetime.now()
+            )
+            self.db_manager.add_and_commit(online_record)
+        except Exception as e:
+            print(f"记录在线玩家失败: {e}")
+    
+    def get_pending_messages(self) -> List[RIAMsgSend]:
+        """获取所有待发送的消息
+        
+        Returns:
+            待发送消息列表
+        """
+        try:
+            from sqlalchemy.orm import Session
+            
+            temp_session = Session(bind=engine)
+            try:
+                return temp_session.query(RIAMsgSend).all()
+            finally:
+                temp_session.close()
+        except Exception as e:
+            print(f"获取待发送消息失败: {e}")
+            return []
+    
+    def delete_message(self, message_id: int) -> bool:
+        """删除指定的消息
+        
+        Args:
+            message_id: 消息ID
+            
+        Returns:
+            是否删除成功
+        """
+        try:
+            from sqlalchemy.orm import Session
+            
+            temp_session = Session(bind=engine)
+            try:
+                message = temp_session.query(RIAMsgSend).filter(RIAMsgSend.id == message_id).first()
+                if message:
+                    temp_session.delete(message)
+                    temp_session.commit()
+                    return True
+                return False
+            finally:
+                temp_session.close()
+        except Exception as e:
+            print(f"删除消息失败: {e}")
+            return False
 
 
 # 创建数据库表

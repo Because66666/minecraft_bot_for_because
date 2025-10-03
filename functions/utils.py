@@ -342,6 +342,8 @@ class SystemUtils:
         """
         return os.path.exists(f'./static/img/{playername}.png')
 
+
+
 # 创建全局实例
 email_service = EmailService()
 text_validator = TextValidator()
