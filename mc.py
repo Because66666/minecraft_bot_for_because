@@ -235,8 +235,6 @@ class GameUtils:
         except Exception as e:
             logger.error(f"关闭调度器失败: {e}")
 
-        # 使用SystemUtils安全退出
-        SystemUtils.safe_exit(reason_str)
 
     @staticmethod
     def check_entity_status() -> bool:
@@ -266,7 +264,7 @@ class GameUtils:
             if not GameUtils.check_entity_status():
                 runtime = time.time() - minecraft_bot.start_time
                 error_msg = f"登录失败，实体初始化为None，程序运行时间：{runtime}s"
-                kook_api.send_message(config.KOOK_MAIN_CHANNEL, f"发送错误。原因: {error_msg}")
+                # kook_api.send_message(config.KOOK_MAIN_CHANNEL, f"发送错误。原因: {error_msg}")
 
                 # 如果运行时间超过10分钟仍未正常，退出程序
                 if runtime > 600:
@@ -376,9 +374,9 @@ class BotEventHandler:
             time.sleep(5)  # 等待服务器准备
 
             # 执行登录命令
-            server_password = config.SERVER_PASSWORD
-            if server_password:
-                bot.chat(f"/login {server_password}")
+            # server_password = config.SERVER_PASSWORD
+            # if server_password:
+            #     bot.chat(f"/login {server_password}")
 
             # 记录登录信息
             login_time = datetime.datetime.now()
@@ -609,7 +607,7 @@ class BotEventHandler:
                 else:
                     hurt_message = f"{entity_name}受到伤害！"
 
-                kook_api.send_message(config.KOOK_MAIN_CHANNEL, hurt_message)
+                # kook_api.send_message(config.KOOK_MAIN_CHANNEL, hurt_message)
                 logger.info(hurt_message)
 
         except Exception as e:
@@ -875,13 +873,13 @@ class MinecraftBot:
         bot_config = {
             "host": host,
             "port": port,
-            "username": username
+            "username": username,
+            'version': '1.18.2'
         }
 
-        if auth == 'True':
+        if config.MINECRAFT_AUTH:
             bot_config.update({
                 'auth': 'microsoft',
-                'version': '1.12.2'
             })
 
         self.bot = self.mineflayer.createBot(bot_config)
@@ -1019,37 +1017,11 @@ def register_event_handlers():
 
 class MessageManager:
     """消息管理器"""
-
-    @staticmethod
-    def check_bot_status() -> bool:
-        """检查机器人状态
-        
-        Returns:
-            bool: 机器人是否正常
-        """
-        try:
-            if not GameUtils.check_entity_status():
-                runtime = time.time() - minecraft_bot.start_time
-                error_msg = f"登录失败，实体初始化为None，程序运行时间：{runtime}s"
-                kook_api.send_message(config.KOOK_MAIN_CHANNEL, f"发送错误。原因: {error_msg}")
-
-                if runtime > 600:
-                    GameUtils.exit_game('长时间无法正常登录')
-                    return False
-
-                return False
-
-            return True
-
-        except Exception as e:
-            logger.error(f'检查机器人状态失败: {e}')
-            return False
-
     @staticmethod
     def send_pending_messages() -> None:
         """发送待发送的消息"""
         try:
-            if not MessageManager.check_bot_status():
+            if not GameUtils.check_entity_status():
                 return
 
             # 使用DatabaseService的方法获取待发送消息
@@ -1128,12 +1100,6 @@ def setup_scheduled_tasks():
             id='check_players'
         )
 
-        timetable_manager.scheduler.add_job(
-            MessageManager.check_bot_status,
-            'cron',
-            minute='*',
-            id='check_online_status'
-        )
 
         timetable_manager.scheduler.add_job(
             MessageManager.send_pending_messages,
@@ -1212,14 +1178,6 @@ def cleanup():
     try:
         logger.info('正在清理资源...')
 
-        # 关闭数据库连接
-        if db_manager:
-            db_manager.close()
-
-        # 停止调度器
-        if timetable_manager and timetable_manager.scheduler.running:
-            logger.info('正在停止调度器...')
-            timetable_manager.scheduler.shutdown(wait=False)
         GameUtils.exit_game('程序结束。')
         
         logger.info('程序结束...')
@@ -1229,6 +1187,7 @@ def cleanup():
     finally:
         # 关闭日志系统
         logging.shutdown()
+        sys.exit(0)
 
 
 if __name__ == '__main__':
