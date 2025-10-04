@@ -65,7 +65,7 @@ class EmailService:
         except smtplib.SMTPException as e:
             logger.error(f"发送邮件失败: {e}")
             # logger.error(f"配置信息: {self.mail_config}")
-            return {'msg': '验证码发送失败', 'status': 0}
+            return {'msg': '验证码发送失败', 'status': 1}
         except Exception as e:
             logger.error(f"邮件服务异常: {e}")
             return {'msg': '邮件服务异常', 'status': 1}
@@ -341,6 +341,26 @@ class SystemUtils:
             bool: 玩家是否存在
         """
         return os.path.exists(f'./static/img/{playername}.png')
+
+    @staticmethod
+    def check_email_valid(username:str,email: str) -> bool:
+        """
+        检查这个邮箱是否是已经绑定的用户，通过邮箱检查。
+        
+        Args:
+            username: 用户名
+            email: 邮箱
+            
+        Returns:
+            bool: 邮箱合理
+        """
+        from database import DatabaseManager, RIAPlayers
+        db_manager = DatabaseManager()
+        user = db_manager.session.query(RIAPlayers).filter_by(player_name=username).first()
+        if user is None:
+            return True
+        else:
+            return user.email == email
 
 
 

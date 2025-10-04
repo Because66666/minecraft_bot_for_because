@@ -12,6 +12,14 @@ place_timetable = {
     "gong_jian": datetime.time(18, 0),  # 18:00
 }
 
+# 地点映射表
+place_map_2 = {
+    "main": '云岫-外交公馆',
+    "community": '云岫-社团中心',
+    "iron": '云岫-刷铁机',
+    "new": 'expo7',
+    "gong_jian":"大坑共建"
+}
 
 
 # 活动时间表配置

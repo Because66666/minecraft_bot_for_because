@@ -266,6 +266,9 @@ class CustomAIChat(ZhipuAIChat):
         self.temperature = 0.7  # 调整创造性
 ```
 
+#### 网页端API接口说明
+[转md文档](server_api.md)
+
 ## 故障排除
 
 ### 常见问题

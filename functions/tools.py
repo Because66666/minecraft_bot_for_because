@@ -32,6 +32,10 @@ app = Flask(__name__,
            static_folder=str(static_dir))
 app.config['SECRET_KEY'] = config.SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
+app.config['SESSION_COOKIE_NAME'] = 'mc_bot_session'
+
+# 初始化Flask-SQLAlchemy
+db.init_app(app)
 
 # 初始化Socket.IO
 socketio = SocketIO(

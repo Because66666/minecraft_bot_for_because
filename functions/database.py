@@ -160,6 +160,25 @@ class RIAPlayers(Base, UserMixin):
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
     player_name = Column(Text, comment='玩家名字')
     email = Column(Text, comment='邮箱地址')
+    
+    def get_id(self):
+        """返回用户唯一标识，Flask-Login要求实现此方法"""
+        return str(self.id)
+    
+    @property
+    def is_active(self):
+        """用户是否激活，Flask-Login要求"""
+        return True
+    
+    @property
+    def is_authenticated(self):
+        """用户是否已认证，Flask-Login要求"""
+        return True
+    
+    @property
+    def is_anonymous(self):
+        """是否为匿名用户，Flask-Login要求"""
+        return False
 
 
 class DatabaseService:

@@ -67,13 +67,19 @@ class WebServer:
         """加载用户
         
         Args:
-            user_id: 用户ID
+            user_id: 用户ID（主键）
             
         Returns:
             用户对象或None
         """
         try:
-            return self.db_manager.session.query(RIAPlayers).filter_by(id=int(user_id)).first()
+            logger.info(f'尝试加载用户，用户ID: {user_id}')
+            user = self.db_manager.session.query(RIAPlayers).filter_by(id=int(user_id)).first()
+            if user:
+                logger.info(f'成功加载用户: {user.player_name} (ID: {user.id})')
+            else:
+                logger.warning(f'未找到用户ID: {user_id}')
+            return user
         except Exception as e:
             logger.error(f'加载用户失败: {e}')
             return None
@@ -148,7 +154,7 @@ class WebServer:
         self.app.add_url_rule('/', 'index', self.index, methods=['GET'])
         self.app.add_url_rule('/common', 'index_common', self.index_common, methods=['GET'])
         self.app.add_url_rule('/login', 'login_page', self.login_page, methods=['GET', 'POST'])
-        self.app.add_url_rule('/logout', 'logout', login_required(self.logout), methods=['GET'])
+        self.app.add_url_rule('/logout', 'logout', self.logout, methods=['GET'])
         self.app.add_url_rule('/register', 'register', self.register, methods=['GET', 'POST'])
         self.app.add_url_rule('/msg_send', 'msg_send', login_required(self.msg_send), methods=['POST'])
         self.app.add_url_rule('/login_api/send', 'login_api_send', self.login_api_send, methods=['POST'])
@@ -196,6 +202,7 @@ class WebServer:
         """主页"""
         try:
             log_data, max_id, min_id = self._prepare_log_data(1)
+            logger.info(f'访问主页 - 用户认证状态: {current_user.is_authenticated if hasattr(current_user, "is_authenticated") else "未定义"}, 用户: {current_user.player_name if hasattr(current_user, "player_name") else "匿名"}')
             return render_template(
                 'main_v3.html',
                 logs=log_data,
@@ -211,6 +218,7 @@ class WebServer:
         """通用日志页面"""
         try:
             log_data, max_id, min_id = self._prepare_log_data(2)
+            logger.info(f'访问通用日志页面 - 用户认证状态: {current_user.is_authenticated if hasattr(current_user, "is_authenticated") else "未定义"}, 用户: {current_user.player_name if hasattr(current_user, "player_name") else "匿名"}')
             return render_template(
                 'main_com_log_v3.html',
                 logs=log_data,
@@ -320,20 +328,27 @@ class WebServer:
             
             # 登录用户
             login_user(user, remember=True)
+            # 确保会话是永久的
+            from flask import session
+            session.permanent = True
             
             # 清除验证码缓存
             del self.verification_cache[email]
             
+            logger.info(f'用户登录成功: {username} (ID: {user.id})')
             return jsonify({'msg': '登录成功', 'status': 0})
             
         except Exception as e:
             logger.error(f'用户登录失败: {e}')
             return jsonify({'msg': '登录失败', 'status': 1})
 
+    @login_required
     def logout(self):
         """用户登出"""
         try:
+            username = current_user.player_name if hasattr(current_user, 'player_name') else '未知用户'
             logout_user()
+            logger.info(f'用户登出成功: {username}')
             return redirect(url_for('index'))
         except Exception as e:
             logger.error(f'用户登出失败: {e}')
@@ -395,7 +410,7 @@ def main():
         web_server = WebServer()
         
         # 启动服务器
-        web_server.run()
+        web_server.run(host='0.0.0.0', port=211, debug=False)
         
     except KeyboardInterrupt:
         logger.info('收到中断信号，正在关闭Web服务器...')
