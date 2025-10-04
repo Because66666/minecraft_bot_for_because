@@ -54,6 +54,9 @@ class Config:
     STATIC_IMG_PATH = './static/img'
     EGGS_FILE_PATH = 'eggs.txt'
     LOGS_DIR = './logs'
+
+    # 开发环境
+    ENV = os.getenv('ENV','')
     
     @classmethod
     def validate_config(cls) -> bool:

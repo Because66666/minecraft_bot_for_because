@@ -42,7 +42,8 @@ socketio = SocketIO(
     app, 
     cors_allowed_origins="*",
     ping_timeout=config.PING_TIMEOUT,
-    ping_interval=config.PING_INTERVAL
+    ping_interval=config.PING_INTERVAL,
+    async_mode='threading'  # Windows环境下使用threading模式避免gevent-websocket问题
 )
 
 

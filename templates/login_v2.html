@@ -2,6 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style_v2.css' ) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename= 'css/notyf.css' ) }}">
@@ -27,6 +29,109 @@
 .disabled\:opacity-50:disabled{opacity:0.5}
 @media (min-width: 640px){.sm\:bottom-0{bottom:0px}.sm\:right-0{right:0px}.sm\:top-auto{top:auto}.sm\:flex-col{flex-direction:column}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}}
 @media (min-width: 1024px){.lg\:max-w-\[420px\]{max-width:420px}.lg\:px-8{padding-left:2rem;padding-right:2rem}}
+    </style>
+    <style>
+        /* 移动端优化样式 */
+        @media (max-width: 640px) {
+            /* 优化小屏幕下的内边距 */
+            .min-h-\[100dvh\] {
+                padding: 1rem !important;
+            }
+            
+            /* 调整标题大小 */
+            .text-3xl {
+                font-size: 1.5rem !important;
+                line-height: 2rem !important;
+            }
+            
+            /* 优化输入框触摸体验 */
+            .h-10 {
+                height: 2.75rem !important; /* 增加触摸目标高度 */
+                font-size: 16px !important; /* 防止iOS缩放 */
+            }
+            
+            /* 优化按钮触摸体验 */
+            button {
+                min-height: 2.75rem !important; /* 增加触摸目标高度 */
+                font-size: 16px !important; /* 防止iOS缩放 */
+            }
+            
+            /* 调整间距 */
+            .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 1rem !important;
+            }
+            
+            .mt-6 {
+                margin-top: 1rem !important;
+            }
+            
+            .mt-2 {
+                margin-top: 0.5rem !important;
+            }
+            
+            /* 优化验证码输入区域 */
+            .flex.items-center.gap-3 {
+                gap: 0.5rem !important;
+            }
+            
+            /* 发送验证码按钮优化 */
+            .flex.items-center.gap-3 button {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+                font-size: 14px !important;
+            }
+        }
+        
+        /* 超小屏幕优化 (iPhone SE等) */
+        @media (max-width: 375px) {
+            .max-w-md {
+                max-width: 100% !important;
+            }
+            
+            .text-3xl {
+                font-size: 1.25rem !important;
+            }
+            
+            .text-sm {
+                font-size: 0.875rem !important;
+            }
+        }
+        
+        /* 触摸设备优化 */
+        @media (hover: none) and (pointer: coarse) {
+            button:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+            
+            input:focus {
+                font-size: 16px !important; /* 防止iOS自动缩放 */
+            }
+        }
+        
+        /* 安全区域适配 (iPhone X及以上) */
+        @supports (padding: env(safe-area-inset-bottom)) {
+            .min-h-\[100dvh\] {
+                padding-bottom: env(safe-area-inset-bottom) !important;
+                padding-top: env(safe-area-inset-top) !important;
+            }
+        }
+        
+        /* 横屏模式优化 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .min-h-\[100dvh\] {
+                padding-top: 0.5rem !important;
+                padding-bottom: 0.5rem !important;
+            }
+            
+            .text-3xl {
+                font-size: 1.25rem !important;
+            }
+            
+            .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 0.5rem !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -58,7 +163,7 @@
                 <div class="mt-1 flex items-center gap-3" data-id="14"><input
                         class="h-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 block w-full appearance-none rounded-md border border-input bg-background px-3 py-2 placeholder-muted-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm"
                         id="captcha" required="" data-id="15" type="text" name="captcha">
-                    <button class="rounded-md bg-muted px-3 py-2 text-sm font-medium text-foreground" data-id="16">发送
+                    <button class="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground whitespace-nowrap" data-id="16">发送验证码
                     </button>
                 </div>
             </div>

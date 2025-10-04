@@ -73,10 +73,11 @@ class WebServer:
             用户对象或None
         """
         try:
-            logger.info(f'尝试加载用户，用户ID: {user_id}')
+            if not user_id: return None
+            logger.debug(f'尝试加载用户，用户ID: {user_id}')
             user = self.db_manager.session.query(RIAPlayers).filter_by(id=int(user_id)).first()
             if user:
-                logger.info(f'成功加载用户: {user.player_name} (ID: {user.id})')
+                logger.debug(f'成功加载用户: {user.player_name} (ID: {user.id})')
             else:
                 logger.warning(f'未找到用户ID: {user_id}')
             return user
@@ -202,7 +203,7 @@ class WebServer:
         """主页"""
         try:
             log_data, max_id, min_id = self._prepare_log_data(1)
-            logger.info(f'访问主页 - 用户认证状态: {current_user.is_authenticated if hasattr(current_user, "is_authenticated") else "未定义"}, 用户: {current_user.player_name if hasattr(current_user, "player_name") else "匿名"}')
+            logger.debug(f'访问主页 - 用户认证状态: {current_user.is_authenticated if hasattr(current_user, "is_authenticated") else "未定义"}, 用户: {current_user.player_name if hasattr(current_user, "player_name") else "匿名"}')
             return render_template(
                 'main_v3.html',
                 logs=log_data,
@@ -218,7 +219,7 @@ class WebServer:
         """通用日志页面"""
         try:
             log_data, max_id, min_id = self._prepare_log_data(2)
-            logger.info(f'访问通用日志页面 - 用户认证状态: {current_user.is_authenticated if hasattr(current_user, "is_authenticated") else "未定义"}, 用户: {current_user.player_name if hasattr(current_user, "player_name") else "匿名"}')
+            logger.debug(f'访问通用日志页面 - 用户认证状态: {current_user.is_authenticated if hasattr(current_user, "is_authenticated") else "未定义"}, 用户: {current_user.player_name if hasattr(current_user, "player_name") else "匿名"}')
             return render_template(
                 'main_com_log_v3.html',
                 logs=log_data,
@@ -371,6 +372,7 @@ class WebServer:
         try:
             logger.info(f'启动Web服务器，地址: {host}:{port}')
             
+            # Windows环境下使用threading模式，避免gevent-websocket问题
             self.socketio.run(
                 self.app,
                 host=host,
@@ -410,7 +412,10 @@ def main():
         web_server = WebServer()
         
         # 启动服务器
-        web_server.run(host='0.0.0.0', port=211, debug=False)
+        if config.ENV == 'development':
+            web_server.app.run(host='127.0.0.1', port=211, debug=True)
+        else:
+            web_server.app.run(host='0.0.0.0', port=211, debug=False)
         
     except KeyboardInterrupt:
         logger.info('收到中断信号，正在关闭Web服务器...')

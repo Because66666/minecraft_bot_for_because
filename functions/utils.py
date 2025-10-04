@@ -340,7 +340,11 @@ class SystemUtils:
         Returns:
             bool: 玩家是否存在
         """
-        return os.path.exists(f'./static/img/{playername}.png')
+        from database import db_manager, RIAPlayers
+        user = db_manager.session.query(RIAPlayers).filter_by(player_name=playername).first()
+        if user is None:
+            return False
+        return True
 
     @staticmethod
     def check_email_valid(username:str,email: str) -> bool:
@@ -354,8 +358,7 @@ class SystemUtils:
         Returns:
             bool: 邮箱合理
         """
-        from database import DatabaseManager, RIAPlayers
-        db_manager = DatabaseManager()
+        from database import db_manager, RIAPlayers
         user = db_manager.session.query(RIAPlayers).filter_by(player_name=username).first()
         if user is None:
             return True

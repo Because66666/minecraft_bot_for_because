@@ -4,6 +4,13 @@ function scrollToBottom() {
     hideButton();
 }
 
+function guideButton() {
+    if (window.location.pathname === '/') {
+        window.location.href = '/common';
+    } else {
+        window.location.href = '/';
+    }
+}
 function showButton() {
     document.querySelector(".icon.black.down111").style.display = "flex";
 }
@@ -37,6 +44,7 @@ checkScrollPosition();
 // 绑定点击事件
 document.querySelector(".icon.black.down111").addEventListener("click", scrollToBottom);
 
+document.querySelector(".icon.black.other_com").addEventListener("click", guideButton);
 
 
 // 绑定登录按钮事件

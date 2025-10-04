@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,89 +9,149 @@
     <link rel="stylesheet" href="{{ url_for('static', filename= 'css/button.css' ) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename= 'css/send.css' ) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename= 'css/notyf.css' ) }}">
+    <style>
+        /* 移动端优化：确保内容不被输入框遮挡 */
+        @media (max-width: 768px) {
+            .bg-gray-100 {
+                padding-bottom: 100px !important;
+                /* 在小屏幕上增加更多底部间距 */
+            }
+        }
+
+        /* 横屏模式优化 */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .bg-gray-100 {
+                padding-bottom: 80px !important;
+            }
+
+            .input-container {
+                bottom: 10px !important;
+                padding: 8px !important;
+            }
+        }
+
+        /* 安全区域适配 (iPhone X及以上有刘海的设备) */
+        @supports (padding: env(safe-area-inset-bottom)) {
+            .bg-gray-100 {
+                padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+            }
+
+            @media (max-width: 768px) {
+                .bg-gray-100 {
+                    padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important;
+                }
+            }
+        }
+    </style>
 </head>
+
 <body>
 
 
-<!--//消息展示 style="margin-bottom: 60px"-->
-<div class="min-h-screen flex items-center justify-center bg-gray-100 p-4" data-id="1">
-    <div class="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-3xl" data-id="2" data-v0-t="card">
-        <div class="p-6 space-y-6" data-id="3">
-            {% for log in logs %}
-            <div id="{{log.id}}"
-                 class="p-4 rounded-lg border bg-blue-50 shadow-sm transition-all duration-300 hover:shadow-md">
-                <div class="flex items-start" data-id="5">
-                    <p class="text-lg break-words" data-id="7" style="white-space: pre-wrap">[{{log.t}}]{{ log.log_string}}
-                </p></div>
-            </div>
-            {% endfor %}
+    <!--//消息展示 style="margin-bottom: 60px"-->
+    <div class="min-h-screen flex items-center justify-center bg-gray-100 p-4 pb-[80px]" data-id="1">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-3xl" data-id="2"
+            data-v0-t="card">
+            <div class="p-6 space-y-6" data-id="3">
+                {% for log in logs %}
+                <div id="{{log.id}}"
+                    class="p-4 rounded-lg border bg-blue-50 shadow-sm transition-all duration-300 hover:shadow-md">
+                    <div class="flex items-start" data-id="5">
+                        <p class="text-lg break-words" data-id="7" style="white-space: pre-wrap">[{{log.t}}]{{
+                            log.log_string}}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
 
+            </div>
         </div>
     </div>
-</div>
 
 
 
-<ul class="wrapper scrollToBottomBtn">
+    <ul class="wrapper scrollToBottomBtn">
+        <li class="icon black other_com">
+            <div style="opacity: 1; transform: none;">
+                <button
+                    class="flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl"
+                    tabindex="0"
+                    style="background-color: rgb(230, 242, 255); border: 2px solid rgb(133, 184, 232); transform: none;">
+                    <div style="color: rgb(0, 0, 0);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path fill="currentColor"
+                                d="m12.05 19l2.85-2.825l-2.85-2.825L11 14.4l1.075 1.075q-.7.025-1.362-.225t-1.188-.775q-.5-.5-.763-1.15t-.262-1.3q0-.425.113-.85t.312-.825l-1.1-1.1q-.425.625-.625 1.325T7 12q0 .95.375 1.875t1.1 1.65t1.625 1.088t1.85.387l-.95.95zm4.125-4.25q.425-.625.625-1.325T17 12q0-.95-.363-1.888T15.55 8.45t-1.638-1.075t-1.862-.35L13 6.05L11.95 5L9.1 7.825l2.85 2.825L13 9.6l-1.1-1.1q.675 0 1.375.263t1.2.762t.763 1.15t.262 1.3q0 .425-.112.85t-.313.825zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </li>
 
-    <li class="icon black other_com"><a href="/">
-    <span class="tooltip">切换</span>
-    <span class="label">☼</span></a></li>
+        {% if current_user.is_authenticated %}
+        <!--退出账户按钮-->
+        <li class="icon black logout">
+            <div style="opacity: 1; transform: none;">
+                <button
+                    class="flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl"
+                    tabindex="0"
+                    style="background-color: rgb(230, 242, 255); border: 2px solid rgb(133, 184, 232); transform: none;">
+                    <div style="color: rgb(0, 0, 0);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path fill="currentColor"
+                                d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h6q.425 0 .713.288T12 4t-.288.713T11 5H5v14h6q.425 0 .713.288T12 20t-.288.713T11 21zm12.175-8H10q-.425 0-.712-.288T9 12t.288-.712T10 11h7.175L15.3 9.125q-.275-.275-.275-.675t.275-.7t.7-.313t.725.288L20.3 11.3q.3.3.3.7t-.3.7l-3.575 3.575q-.3.3-.712.288t-.713-.313q-.275-.3-.262-.712t.287-.688z" />
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </li>
+
+        {% endif %}
+        <!--向下滑动按钮-->
+        <li class="icon black logout down111">
+            <div style="opacity: 1; transform: none;">
+                <button
+                    class="flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl"
+                    tabindex="0"
+                    style="background-color: rgb(230, 242, 255); border: 2px solid rgb(133, 184, 232); transform: none;">
+                    <div style="color: rgb(0, 0, 0);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path fill="currentColor"
+                                d="M12 21.9q-.2 0-.375-.075T11.3 21.6l-5.6-5.575q-.275-.275-.275-.7T5.7 14.6q.3-.3.713-.3t.712.3L11 18.5v-6.175q0-.425.288-.712t.712-.288t.713.288t.287.712V18.5l3.9-3.9q.275-.275.688-.275t.712.3q.275.275.275.7t-.275.7L12.7 21.6q-.15.15-.325.225T12 21.9m0-12.575q-.425 0-.712-.287T11 8.325v-1q0-.425.288-.712T12 6.325t.713.288t.287.712v1q0 .425-.288.713T12 9.325m0-5q-.425 0-.712-.287T11 3.325t.288-.712t.712-.288t.713.288t.287.712t-.288.713t-.712.287" />
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </li>
+
+    </ul>
+
 
 
     {% if current_user.is_authenticated %}
-    <!--退出账户按钮-->
-    <li class="icon black logout">
-        <span class="tooltip">登出</span>
-        <span><svg viewBox="0 0 16 16" class="bi bi-chevron-double-left" fill="currentColor" height="16" width="16"
-                   xmlns="http://www.w3.org/2000/svg">
-  <path d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"
-        fill-rule="evenodd"></path>
-  <path d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"
-        fill-rule="evenodd"></path>
-</svg></span></li>
-    {% endif %}
-    <!--向下滑动按钮-->
-    <li class="icon black down111">
-        <span class="tooltip">下滑</span>
-        <span style="display:block"><svg viewBox="0 0 16 16" class="bi bi-chevron-double-down" fill="currentColor"
-                                         height="16" width="16"
-                                         xmlns="http://www.w3.org/2000/svg">
-  <path d="M1.646 6.646a.5.5 0 0 1 .708 0L8 12.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-        fill-rule="evenodd"></path>
-  <path d="M1.646 2.646a.5.5 0 0 1 .708 0L8 8.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-        fill-rule="evenodd"></path>
-</svg></span>
-    </li>
-</ul>
-
-
-{% if current_user.is_authenticated %}
-<!--// 如果已经登录，显示发送按钮-->
-<div class="flex space-x-2"><input
-        class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-        id="messageInput">
-    <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-9 px-4 py-2 shrink-0"
-            id="sendMessageBtn">发送
-    </button>
-</div>
-{% else %}
-<!--// 如果未登录，则显示登录按钮-->
-<button class="login_button items-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 flex w-full justify-center rounded-md bg-primary py-2 px-4 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+    <!--// 如果已经登录，显示发送按钮-->
+    <div class="input-container">
+        <input class="message-input" id="messageInput" placeholder="输入消息...">
+        <button class="send-button" id="sendMessageBtn">发送</button>
+    </div>
+    {% else %}
+    <!--// 如果未登录，则显示登录按钮-->
+    <button
+        class="login_button items-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 flex w-full justify-center rounded-md bg-primary py-2 px-4 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         type="submit" data-id="18" id="login_button">登录以发言
-</button>
-{% endif %}
+    </button>
+    {% endif %}
 
-<script>
-    var max_log_id = {{ max_log_id }};
-    var min_log_id = {{ min_log_id }};
-</script>
-<script src="{{ url_for('static', filename= 'js/notyf.js' ) }}"></script>
-<script src="{{ url_for('static', filename= 'js/button.js' ) }}"></script>
-<script src="{{ url_for('static', filename= 'js/socket.js' ) }}"></script>
-<script src="{{ url_for('static', filename= 'js/common_log/message_com_v2.js' ) }}"></script>
-<script src="{{ url_for('static', filename= 'js/send.js' ) }}"></script>
-<script src="{{ url_for('static', filename= 'js/common_log/update_old_log_com.js' ) }}"></script>
-<script src="{{ url_for('static', filename= 'js/other_func.js' ) }}"></script>
+    <script>
+        var max_log_id = {{ max_log_id }};
+        var min_log_id = {{ min_log_id }};
+    </script>
+    <script src="{{ url_for('static', filename= 'js/notyf.js' ) }}"></script>
+    <script src="{{ url_for('static', filename= 'js/button.js' ) }}"></script>
+    <script src="{{ url_for('static', filename= 'js/socket.js' ) }}"></script>
+    <script src="{{ url_for('static', filename= 'js/common_log/message_com_v2.js' ) }}"></script>
+    <script src="{{ url_for('static', filename= 'js/send.js' ) }}"></script>
+    <script src="{{ url_for('static', filename= 'js/common_log/update_old_log_com.js' ) }}"></script>
+    <script src="{{ url_for('static', filename= 'js/other_func.js' ) }}"></script>
 </body>
+
 </html>
