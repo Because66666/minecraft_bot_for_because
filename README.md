@@ -19,11 +19,13 @@
 - **实时通知**：游戏事件实时推送到Kook频道
 
 ### 🌐 Web 实时对话界面
-- **用户管理**：用户注册、登录、认证
-- **用户认证**：基于邮箱的用户注册和登录系统
-- **消息管理**：支持消息发送、接收和历史记录
-- **日志查看**：实时查看游戏和系统日志
-- **消息发送**：通过Web界面发送消息到游戏，并且与游戏内玩家实时对话
+- **用户管理**：基于邮箱验证码的用户注册和登录系统
+- **消息管理**：支持消息发送、接收和历史记录查看
+- **日志查看**：实时查看游戏聊天日志和系统通用日志
+- **消息发送**：通过Web界面发送消息到游戏，与游戏内玩家实时对话
+- **数据分析**：提供玩家发言统计和在线人数变化的可视化仪表板
+- **IP封禁管理**：自动检测和封禁恶意请求的IP地址
+- **会话管理**：支持用户登录状态保持和安全登出
 
 ### 🧠 AI聊天功能
 - **智谱AI集成**：使用智谱AI的GLM-4-Flash模型提供智能对话
@@ -46,10 +48,13 @@
 - **日志系统**：分类日志记录和错误追踪
 
 ### 数据库模型
-- **用户管理**：玩家信息、认证状态
-- **消息系统**：聊天记录、消息队列
-- **日志系统**：操作日志、错误日志
-- **AI集成**：AI对话历史和配置
+- **RIAPlayers**：玩家信息和认证状态，支持Flask-Login用户管理
+- **RIALogInfo**：游戏内聊天日志记录，包含玩家名和消息内容
+- **RIALogCommon**：通用系统日志记录
+- **RIAMsgSend**：消息发送队列，用于向游戏内发送消息
+- **RIAOnline**：玩家在线状态记录，包含JSON格式的详细数据
+- **WEBBannedIPs**：Web端IP封禁管理，记录封禁原因和时间
+- **DashboardDaily**：每日仪表板数据，包含在线人数曲线和玩家发言统计
 
 ## 安装和配置
 
@@ -112,6 +117,9 @@ pip install -r requirements.txt
 **Flask应用配置：**
 - `SECRET_KEY`: Flask应用密钥
 
+**环境变量说明：**
+- `ENV`: 运行环境，`development`为开发环境，`production`为生产环境
+
 **获取智谱AI API密钥：**
 1. 访问 [智谱AI开放平台](https://open.bigmodel.cn/)
 2. 注册账号并创建API密钥
@@ -156,7 +164,7 @@ python server.py
 ## 项目结构
 
 ```
-mc_bot_for_github/
+mc_bot_3/
 ├── mc.py                 # Minecraft机器人主程序
 ├── server.py             # Flask Web服务器
 ├── .env                  # 环境变量配置文件
@@ -172,15 +180,25 @@ mc_bot_for_github/
 │   ├── kook_api.py       # Kook API封装
 │   ├── communicate_by_ai.py # AI通信模块
 │   ├── keyword_in_communication.py # 关键词处理
-│   └── timetable_info.py # 时间表信息模块
+│   ├── timetable_info.py # 时间表信息模块
+│   └── square/           # 广场功能模块
+│       ├── dashboard_handle.py # 仪表板数据处理
+│       └── dashboard_handle_database_doc.md # 数据库文档
 ├── templates/            # HTML模板文件
 │   ├── error.html        # 错误页面
-│   ├── for_because.html  # 主页面
-│   └── for_because_v2.html # 主页面v2
+│   ├── login_v2.html     # 登录页面
+│   ├── main_v3.html      # 主页面（聊天日志）
+│   ├── main_com_log_v3.html # 通用日志页面
+│   ├── square.html       # 广场页面
+│   └── dashboard/        # 仪表板模板
+│       └── index.html    # 数据分析页面
 ├── static/              # 静态资源
 │   ├── css/             # 样式文件
 │   ├── js/              # JavaScript文件
-│   └── img/             # 图片资源（玩家头像）
+│   ├── img/             # 图片资源（玩家头像）
+│   └── svg/             # SVG图标资源
+├── blog/                # 博客相关功能
+│   └── python_script/   # Python脚本
 ├── logs/                # 日志文件目录
 │   ├── ai.txt           # AI对话日志
 │   ├── communication.txt # 通信日志
@@ -206,12 +224,13 @@ mc_bot_for_github/
 - **Logger系统**：分类日志记录（通信、AI、发送、错误）
 
 #### 数据库模型
-- **RIAPlayers**：玩家信息和认证状态
-- **RIAMsgSend**：消息发送队列
-- **RIALogin**：玩家登录记录
-- **RIAOnline**：在线状态记录
-- **RIALogInfo/RIALogCommon**：系统日志记录
-- **CreativeLogin**：创造服务器登录记录
+- **RIAPlayers**：玩家信息和认证状态，支持Flask-Login用户管理
+- **RIALogInfo**：游戏内聊天日志记录，包含玩家名和消息内容
+- **RIALogCommon**：通用系统日志记录
+- **RIAMsgSend**：消息发送队列，用于向游戏内发送消息
+- **RIAOnline**：玩家在线状态记录，包含JSON格式的详细数据
+- **WEBBannedIPs**：Web端IP封禁管理，记录封禁原因和时间
+- **DashboardDaily**：每日仪表板数据，包含在线人数曲线和玩家发言统计
 
 ### 扩展开发
 
@@ -231,6 +250,21 @@ class BotEventHandler:
 #### 添加新的Web路由
 ```python
 class WebServer:
+    def _register_routes(self):
+        """注册所有路由"""
+        # 主要路由
+        self.app.add_url_rule('/', 'index', self.check_ip_ban(self.handle_bad_request_and_ban(self.index)), methods=['GET'])
+        self.app.add_url_rule('/common', 'index_common', self.check_ip_ban(self.index_common), methods=['GET'])
+        self.app.add_url_rule('/login', 'login_page', self.check_ip_ban(self.login_page), methods=['GET', 'POST'])
+        self.app.add_url_rule('/logout', 'logout', self.check_ip_ban(self.logout), methods=['GET'])
+        self.app.add_url_rule('/square', 'square_page', self.check_ip_ban(login_required(self.square_page)), methods=['GET'])
+        self.app.add_url_rule('/square/dashboard', 'dashboard_page', self.check_ip_ban(login_required(self.dashboard_page)), methods=['GET'])
+        self.app.add_url_rule('/square/dashboard/api', 'dashboard_page_api', self.check_ip_ban(login_required(self.dashboard_page_api)), methods=['GET'])
+        self.app.add_url_rule('/register', 'register', self.check_ip_ban(self.register), methods=['GET', 'POST'])
+        self.app.add_url_rule('/msg_send', 'msg_send', self.check_ip_ban(login_required(self.msg_send)), methods=['POST'])
+        self.app.add_url_rule('/login_api/send', 'login_api_send', self.check_ip_ban(self.login_api_send), methods=['POST'])
+        self.app.add_url_rule('/login_api/register', 'login_api_register', self.check_ip_ban(self.login_api_register), methods=['POST'])
+
     def new_route(self):
         """新的Web路由"""
         try:
@@ -331,7 +365,14 @@ class CustomAIChat(ZhipuAIChat):
 
 ## 重构日志
 
-### v2.0.0 (最新)
+### v2.1.0 (最新)
+- 更新了数据库模型描述
+- Web功能特性更新
+- 更新了项目目录结构，反映当前的文件组织：
+- server.py路由变化
+- 其他细节更新
+
+### v2.0.0 
 - 完全重构代码架构，模块化设计
 - 改进错误处理和日志记录系统
 - 优化数据库操作和连接管理
