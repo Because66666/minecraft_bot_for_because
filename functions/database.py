@@ -145,14 +145,6 @@ class RIAOnline(Base):
 
 
 
-class UserRecord(Base, UserMixin):
-    """用户记录模型"""
-    __tablename__ = 'user_record'
-    
-    id = Column(Integer, primary_key=True)
-    username = Column(Text, comment='用户名')
-
-
 class RIAPlayers(Base, UserMixin):
     """RIA玩家模型"""
     __tablename__ = 'ria_players'
@@ -179,6 +171,46 @@ class RIAPlayers(Base, UserMixin):
     def is_anonymous(self):
         """是否为匿名用户，Flask-Login要求"""
         return False
+
+
+class WEBBannedIPs(Base):
+    """Web封禁IP模型"""
+    __tablename__ = 'web_banned_ips'
+    
+    id = Column(Integer, primary_key=True, unique=True, nullable=False)
+    ip_address = Column(Text, unique=True, nullable=False, comment='被封禁的IP地址')
+    banned_at = Column(DateTime, default=datetime.datetime.now, comment='封禁时间')
+    reason = Column(Text, default='400 Bad Request', comment='封禁原因')
+    
+    def to_dict(self) -> dict:
+        """转换为字典格式"""
+        return {
+            'id': self.id,
+            'ip_address': self.ip_address,
+            'banned_at': self.banned_at.strftime("%Y-%m-%d %H:%M:%S") if self.banned_at else None,
+            'reason': self.reason
+        }
+
+
+class DashboardDaily(Base):
+    """每日仪表板数据模型"""
+    __tablename__ = 'dashboard_daily'
+    
+    id = Column(Integer, primary_key=True, unique=True, nullable=False)
+    date = Column(DateTime, unique=True, nullable=False, comment='数据日期')
+    online_curve_data = Column(JSON, comment='在线人数变化曲线数据')
+    player_chat_stats = Column(JSON, comment='玩家发言次数统计')
+    created_at = Column(DateTime, default=datetime.datetime.now, comment='记录创建时间')
+    
+    def to_dict(self) -> dict:
+        """转换为字典格式"""
+        return {
+            'id': self.id,
+            'date': self.date.strftime("%Y-%m-%d") if self.date else None,
+            'online_curve_data': self.online_curve_data,
+            'player_chat_stats': self.player_chat_stats,
+            'created_at': self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None
+        }
 
 
 class DatabaseService:
@@ -345,6 +377,110 @@ class DatabaseService:
                 temp_session.close()
         except Exception as e:
             print(f"删除消息失败: {e}")
+            return False
+
+    def ban_ip(self, ip_address: str, reason: str = '400 Bad Request') -> bool:
+        """封禁IP地址
+        
+        Args:
+            ip_address: 要封禁的IP地址
+            reason: 封禁原因
+            
+        Returns:
+            是否封禁成功
+        """
+        try:
+            # 检查IP是否已经被封禁
+            if self.is_ip_banned(ip_address):
+                return True  # 已经被封禁，返回成功
+            
+            banned_ip = WEBBannedIPs(
+                ip_address=ip_address,
+                banned_at=datetime.datetime.now(),
+                reason=reason
+            )
+            self.db_manager.add_and_commit(banned_ip)
+            print(f"IP地址 {ip_address} 已被封禁，原因: {reason}")
+            return True
+        except Exception as e:
+            print(f"封禁IP地址失败: {e}")
+            return False
+    
+    def is_ip_banned(self, ip_address: str) -> bool:
+        """检查IP地址是否被封禁
+        
+        Args:
+            ip_address: 要检查的IP地址
+            
+        Returns:
+            是否被封禁
+        """
+        try:
+            from sqlalchemy.orm import Session
+            
+            temp_session = Session(bind=engine)
+            try:
+                banned_ip = temp_session.query(WEBBannedIPs).filter(
+                    WEBBannedIPs.ip_address == ip_address
+                ).first()
+                return banned_ip is not None
+            finally:
+                temp_session.close()
+        except Exception as e:
+            print(f"检查IP封禁状态失败: {e}")
+            return False
+    
+    def get_banned_ips(self, limit: int = 100) -> List[WEBBannedIPs]:
+        """获取被封禁的IP列表
+        
+        Args:
+            limit: 限制数量
+            
+        Returns:
+            被封禁的IP列表
+        """
+        try:
+            from sqlalchemy.orm import Session
+            
+            temp_session = Session(bind=engine)
+            try:
+                return (temp_session.query(WEBBannedIPs)
+                       .order_by(desc(WEBBannedIPs.banned_at))
+                       .limit(limit)
+                       .all())
+            finally:
+                temp_session.close()
+        except Exception as e:
+            print(f"获取封禁IP列表失败: {e}")
+            return []
+    
+    def unban_ip(self, ip_address: str) -> bool:
+        """解封IP地址
+        
+        Args:
+            ip_address: 要解封的IP地址
+            
+        Returns:
+            是否解封成功
+        """
+        try:
+            from sqlalchemy.orm import Session
+            
+            temp_session = Session(bind=engine)
+            try:
+                banned_ip = temp_session.query(WEBBannedIPs).filter(
+                    WEBBannedIPs.ip_address == ip_address
+                ).first()
+                if banned_ip:
+                    temp_session.delete(banned_ip)
+                    temp_session.commit()
+                    print(f"IP地址 {ip_address} 已解封")
+                    return True
+                return False
+            finally:
+                temp_session.close()
+        except Exception as e:
+            print(f"解封IP地址失败: {e}")
             return False
 
 

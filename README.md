@@ -211,7 +211,6 @@ mc_bot_for_github/
 - **RIALogin**：玩家登录记录
 - **RIAOnline**：在线状态记录
 - **RIALogInfo/RIALogCommon**：系统日志记录
-- **UserRecord**：用户注册和认证记录
 - **CreativeLogin**：创造服务器登录记录
 
 ### 扩展开发

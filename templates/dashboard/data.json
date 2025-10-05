@@ -1,0 +1,172 @@
+{
+  "data": {
+    "created_at": "2025-10-05 21:52:52",
+    "date": "2025-10-04",
+    "id": 1,
+    "online_curve_data": {
+      "hours": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "online_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        8,
+        10,
+        8,
+        13,
+        23,
+        21,
+        24,
+        22
+      ],
+      "peak_count": 24,
+      "peak_hour": 22,
+      "total_unique_players": 38
+    },
+    "player_chat_stats": {
+      "all_players": {
+        "ACHTER_BERG": 115,
+        "A_Magma_Block": 11,
+        "Alert": 1,
+        "AmkiSyto": 4,
+        "An_Night": 72,
+        "Aruku448": 90,
+        "Asubeats": 20,
+        "Aut_moon_white": 100,
+        "BCMonomial": 23,
+        "Because66666": 11,
+        "CKYI": 1,
+        "CandySanjo": 46,
+        "ChigusaHitachi": 15,
+        "DeerEyes": 9,
+        "Dong_Bo_Jue_233": 1,
+        "DumFish123": 118,
+        "Elernal_cy": 275,
+        "EndGlacier": 71,
+        "FY_yang": 8,
+        "FleTime": 40,
+        "Flowerfruit": 1,
+        "GHZCreeper": 66,
+        "HanazonoSerenya": 26,
+        "Hozeyyy": 4,
+        "HyperBird_": 4,
+        "JuMiaoQAQ": 1,
+        "KilimPaper": 36,
+        "MCmuzixuange": 70,
+        "Mocklone": 6,
+        "Nocturen": 8,
+        "Objection": 3,
+        "OlivaFute": 1,
+        "RESW_QHY": 13,
+        "SShakusora": 1,
+        "SaltedfishHK": 12,
+        "SnowFrozen": 27,
+        "Snow_Wolf2648": 23,
+        "SpringEyre_": 65,
+        "Super_zz233": 5,
+        "TLM_Merrli": 58,
+        "VanillaSoda": 5,
+        "Venti_Lynn": 19,
+        "Viper_87": 77,
+        "Volloval": 14,
+        "Zhaoxi_Cor": 57,
+        "_ToKino": 12,
+        "bailandechasheng": 6,
+        "cangqian": 2,
+        "celinakabel": 8,
+        "chara12121": 49,
+        "howMandy": 22,
+        "lan_muda": 7,
+        "lao_dan": 8,
+        "liziluyu": 26,
+        "reebing": 5,
+        "workersteve0722": 43,
+        "xtaotie233": 1
+      },
+      "average_messages_per_player": 31.964912280701753,
+      "top_players": [
+        {
+          "message_count": 275,
+          "player_name": "Elernal_cy"
+        },
+        {
+          "message_count": 118,
+          "player_name": "DumFish123"
+        },
+        {
+          "message_count": 115,
+          "player_name": "ACHTER_BERG"
+        },
+        {
+          "message_count": 100,
+          "player_name": "Aut_moon_white"
+        },
+        {
+          "message_count": 90,
+          "player_name": "Aruku448"
+        },
+        {
+          "message_count": 77,
+          "player_name": "Viper_87"
+        },
+        {
+          "message_count": 72,
+          "player_name": "An_Night"
+        },
+        {
+          "message_count": 71,
+          "player_name": "EndGlacier"
+        },
+        {
+          "message_count": 70,
+          "player_name": "MCmuzixuange"
+        },
+        {
+          "message_count": 66,
+          "player_name": "GHZCreeper"
+        }
+      ],
+      "total_messages": 1822,
+      "total_players": 57
+    }
+  },
+  "message": "成功",
+  "status": 0
+}

@@ -14,7 +14,7 @@ from sqlalchemy import text
 from .config import config
 from .database import (
     db, db_manager, db_service, RIALogInfo, RIALogCommon,
-    RIAPlayers, UserRecord, engine
+    RIAPlayers, engine
 )
 from .utils import FileUtils
 
@@ -155,42 +155,6 @@ avatar_downloader = AvatarDownloader()
 # 工具函数已移动到utils.py模块
 
 
-@socketio.on('send_message')
-def handle_send_message(data):
-    """处理发送消息的请求
-    
-    Args:
-        data: 包含消息、用户名和密码的字典
-    """
-    try:
-        message = data.get('message', '')
-        username = data.get('username', '')
-        password = data.get('password', '')
-
-        # 验证用户身份
-        user = db_manager.session.query(UserRecord).filter_by(username=username).first()
-        if not user or user.password != password:
-            emit('error', {'message': 'Invalid username or password'})
-            return
-
-        # 验证消息内容
-        if not message or len(message.strip()) == 0:
-            emit('error', {'message': 'Message cannot be empty'})
-            return
-            
-        if len(message) > 100:
-            emit('error', {'message': 'Message too long'})
-            return
-
-        # 这里可以添加消息到发送队列的逻辑
-        # 目前只是简单返回成功消息
-        emit('message_sent', {'message': 'Message sent successfully'})
-        
-    except Exception as e:
-        print(f"处理消息发送失败: {e}")
-        emit('error', {'message': 'Internal server error'})
-
-
 @socketio.on('data_get')
 def handle_data_get(max_id):
     """处理获取聊天数据的请求
@@ -212,16 +176,25 @@ def handle_data_get(max_id):
 
         results = []
         for log in reversed(logs):
-            # 检查头像是否存在，如果不存在则添加到下载队列
-            if not FileUtils.check_player_avatar_exists(log.who_string):
-                avatar_downloader.add_player(log.who_string)
-                img_path = 'default.jpg'
-            else:
-                img_path = FileUtils.get_player_avatar_path(log.who_string)
-            
-            result = log.to_dict()
-            result['img_path'] = img_path
-            results.append(result)
+            try:
+                # 检查log对象是否有效
+                if not log or not hasattr(log, 'who_string') or log.who_string is None:
+                    print(f"警告: 发现无效log对象，跳过处理")
+                    continue
+                
+                # 检查头像是否存在，如果不存在则添加到下载队列
+                if not FileUtils.check_player_avatar_exists(log.who_string):
+                    avatar_downloader.add_player(log.who_string)
+                    img_path = 'default.jpg'
+                else:
+                    img_path = FileUtils.get_player_avatar_path(log.who_string)
+                
+                result = log.to_dict()
+                result['img_path'] = img_path
+                results.append(result)
+            except Exception as e:
+                print(f"处理log对象失败: {e}, log信息: {getattr(log, 'id', 'unknown')}")
+                continue
 
         if results:
             json_data = json.dumps(results)
@@ -292,16 +265,25 @@ def handle_update_old_log(min_id):
 
         results = []
         for log in logs:
-            # 检查头像是否存在
-            if not FileUtils.check_player_avatar_exists(log.who_string):
-                avatar_downloader.add_player(log.who_string)
-                img_path = 'default.jpg'
-            else:
-                img_path = FileUtils.get_player_avatar_path(log.who_string)
-            
-            result = log.to_dict()
-            result['img_path'] = img_path
-            results.append(result)
+            try:
+                # 检查log对象是否有效
+                if not log or not hasattr(log, 'who_string') or log.who_string is None:
+                    print(f"警告: 发现无效log对象，跳过处理")
+                    continue
+                
+                # 检查头像是否存在
+                if not FileUtils.check_player_avatar_exists(log.who_string):
+                    avatar_downloader.add_player(log.who_string)
+                    img_path = 'default.jpg'
+                else:
+                    img_path = FileUtils.get_player_avatar_path(log.who_string)
+                
+                result = log.to_dict()
+                result['img_path'] = img_path
+                results.append(result)
+            except Exception as e:
+                print(f"处理历史log对象失败: {e}, log信息: {getattr(log, 'id', 'unknown')}")
+                continue
 
         if results:
             new_id = min(result['id'] for result in results)

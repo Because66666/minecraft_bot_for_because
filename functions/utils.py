@@ -340,8 +340,8 @@ class SystemUtils:
         Returns:
             bool: 玩家是否存在
         """
-        from database import db_manager, RIAPlayers
-        user = db_manager.session.query(RIAPlayers).filter_by(player_name=playername).first()
+        from functions.database import db_manager, RIALogInfo
+        user = db_manager.session.query(RIALogInfo).filter_by(who_string=playername).first()
         if user is None:
             return False
         return True
@@ -358,7 +358,7 @@ class SystemUtils:
         Returns:
             bool: 邮箱合理
         """
-        from database import db_manager, RIAPlayers
+        from functions.database import db_manager, RIAPlayers
         user = db_manager.session.query(RIAPlayers).filter_by(player_name=username).first()
         if user is None:
             return True

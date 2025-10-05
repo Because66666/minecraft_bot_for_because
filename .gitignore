@@ -8,3 +8,4 @@ __pycache__/
 .git/
 .DS_Store
 functions/__pycache__/
+static/img/

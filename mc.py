@@ -289,18 +289,35 @@ class GameUtils:
         except Exception as e:
             logger.error(f'检查在线状态失败: {e}')
             return False
-
     @staticmethod
-    def fetch_online_player_by_map():
+    def fetch_online_player_by_map_api() -> tuple[list,bool]:
         """通过地图API获取当前在线玩家"""
         if not config.MAP_API:  # 如果没有配置地图API，则不进行操作
-            return
+            return [], False
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'}
-        query = requests.get(config.MAP_API, headers=headers)
+            'authority': 'satellite.ria.red',
+            'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="99"',
+            'sec-ch-ua-mobile': '?0',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36 HBPC/12.1.3.310',
+            'sec-ch-ua-platform': '"Windows"',
+            'accept': '*/*',
+            'sec-fetch-site': 'same-origin',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-dest': 'empty',
+            'referer': 'https://satellite.ria.red/map/zth',
+            'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        }
+        query = requests.get(config.MAP_API+f'/{int(time.time()*1000)}', headers=headers)
         if query.status_code != 200:
-            return
+            return [], False
         players = query.json().get('players', [])
+        return players, True
+    @staticmethod
+    def fetch_online_player_by_map():
+        """获取当前在线玩家并记录"""
+        players, success = GameUtils.fetch_online_player_by_map_api()
+        if not success:
+            return
         # 使用DatabaseService的方法记录在线玩家
         for player_body in players:
             player_name = player_body.get('account', '')

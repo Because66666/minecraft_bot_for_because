@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Because的开放广场</title>
+  
+  <!-- 引入本地资源 -->
+  <script src="/static/js/tailwindcss.js"></script>
+  <link href="/static/css/font-awesome.min.css" rel="stylesheet">
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename= 'css/button.css' ) }}">
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4F46E5', // 主色调：深紫色，代表创造力和开放
+            secondary: '#10B981', // 辅助色：绿色，用于数据统计
+            accent: '#F59E0B',   // 强调色：橙色，用于施工中状态
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-scale {
+        @apply transition-transform duration-300 hover:scale-[1.02];
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+  <!-- 页面容器 -->
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+    
+    <!-- 标题区域 -->
+    <header class="text-center mb-10 md:mb-16">
+      <div class="inline-block mb-4">
+        <div class="w-16 h-1 bg-primary rounded-full mx-auto"></div>
+      </div>
+      <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-gray-800 mb-4 text-shadow">
+        Because的开放广场
+      </h1>
+      <p class="text-gray-600 text-lg max-w-2xl mx-auto opacity-80">
+        一个开放、分享与交流的空间，记录与展示Because视角下的各类内容
+      </p>
+    </header>
+    
+    <!-- 主要内容区 - 图片块 -->
+    <main class="flex flex-wrap justify-center gap-6 md:gap-8 max-w-6xl mx-auto">
+      <style>
+        main > * {
+          flex: 0 0 auto;
+          width: 100%;
+          max-width: 350px;
+        }
+        
+        @media (min-width: 768px) {
+          main > * {
+            width: calc(50% - 1rem);
+            max-width: none;
+          }
+        }
+        
+        @media (min-width: 1024px) {
+          main > * {
+            width: calc(33.333% - 1.333rem);
+            max-width: none;
+          }
+        }
+        
+        /* 当只有1个元素时居中 */
+        main:has(> :nth-child(1):last-child) {
+          justify-content: center;
+        }
+        
+        /* 当只有2个元素时居中 */
+        main:has(> :nth-child(2):last-child) {
+          justify-content: center;
+        }
+      </style>
+      
+      <!-- 数据统计 -->
+      <a href="/square/dashboard" class="group">
+        <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 card-scale h-full">
+          <div class="h-48 md:h-56 overflow-hidden relative">
+            <img src="{{ url_for('static', filename='pic/dashboard.png') }}" alt="数据统计" 
+                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-4 left-4">
+              <span class="inline-flex items-center px-3 py-1.5 bg-secondary text-white text-sm font-medium rounded-full">
+                <i class="fa fa-bar-chart mr-2"></i> 数据统计
+              </span>
+            </div>
+          </div>
+          <div class="p-5">
+            <p class="text-gray-600 mb-4">
+              由Because在服务器内记录数据的可视化展示与分析
+            </p>
+            <div class="text-secondary font-medium inline-flex items-center group-hover:translate-x-1 transition-transform">
+              查看详情 <i class="fa fa-arrow-right ml-2"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+      
+      <!-- Because的日志 -->
+       <!--
+      <a href="#" class="group">
+        <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 card-scale h-full">
+          <div class="h-48 md:h-56 overflow-hidden relative">
+            <img src="{{ url_for('static', filename='pic/diary.png') }}" alt="Because的日志" 
+                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-4 left-4">
+              <span class="inline-flex items-center px-3 py-1.5 bg-primary text-white text-sm font-medium rounded-full">
+                <i class="fa fa-book mr-2"></i> Because的日志
+              </span>
+            </div>
+          </div>
+          <div class="p-5">
+            <p class="text-gray-600 mb-4">
+              记录Because的日常思考与服务器内的所见所闻，分享它的成长与感悟。
+            </p>
+            <div class="text-primary font-medium inline-flex items-center group-hover:translate-x-1 transition-transform">
+              阅读更多 <i class="fa fa-arrow-right ml-2"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+      -->
+      <!-- 正在施工 -->
+      <div  class="group">
+        <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 card-scale h-full">
+          <div class="h-48 md:h-56 overflow-hidden relative">
+            <img src="{{ url_for('static', filename='pic/unopen.png') }}" alt="正在施工" 
+                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-4 left-4">
+              <span class="inline-flex items-center px-3 py-1.5 bg-accent text-white text-sm font-medium rounded-full">
+                <i class="fa fa-wrench mr-2"></i> 正在施工
+              </span>
+            </div>
+          </div>
+          <div class="p-5">
+            <p class="text-gray-600 mb-4">
+              新功能与内容正在开发中，敬请期待更多精彩板块的上线。
+            </p>
+            <div class="text-accent font-medium inline-flex items-center group-hover:translate-x-1 transition-transform">
+              你不能了解进度 <i class="fa fa-arrow-right ml-2"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer class="mt-16 md:mt-24 text-center text-gray-500 text-sm pb-8">
+      <div class="w-12 h-px bg-gray-300 mx-auto mb-4"></div>
+      <p>© 2025 Because的开放广场 | 保持开放 · 持续分享</p>
+    </footer>
+  </div>
+  <ul class="wrapper scrollToBottomBtn">
+        <li class="icon black back">
+            <div style="opacity: 1; transform: none;">
+                <button
+                    class="flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl"
+                    tabindex="0"
+                    style="background-color: rgb(230, 242, 255); border: 2px solid rgb(133, 184, 232); transform: none;">
+                    <div style="color: rgb(0, 0, 0);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path fill="currentColor"
+                                d="m7.825 13l4.9 4.9q.3.3.288.7t-.313.7q-.3.275-.7.288t-.7-.288l-6.6-6.6q-.15-.15-.213-.325T4.426 12t.063-.375t.212-.325l6.6-6.6q.275-.275.688-.275t.712.275q.3.3.3.713t-.3.712L7.825 11H19q.425 0 .713.288T20 12t-.288.713T19 13z" />
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </li>
+    </ul>
+  <!-- 交互脚本 -->
+  <script>
+    // 为链接添加点击事件
+    // document.querySelectorAll('a').forEach(link => {
+    //   link.addEventListener('click', function(e) {
+    //     e.preventDefault();
+    //     const target = this.querySelector('span').textContent.trim();
+    //     alert(`即将跳转到: ${target}`);
+    //     // 实际应用中可以使用: window.location.href = '目标链接';
+    //   });
+    // });
+    
+    // 页面加载动画
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.classList.add('opacity-100');
+      document.body.classList.remove('opacity-0');
+    });
+  </script>
+  
+  <script src="{{ url_for('static', filename= 'js/button.js' ) }}"></script>
+</body>
+</html>

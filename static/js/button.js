@@ -11,12 +11,26 @@ function guideButton() {
         window.location.href = '/';
     }
 }
+
+function guideSquare() {
+    window.location.href = '/square';
+}
+function back_button() {
+    window.history.back();
+}
+
 function showButton() {
-    document.querySelector(".icon.black.down111").style.display = "flex";
+    const button = document.querySelector(".icon.black.down111");
+    if (button) {
+        button.style.display = "flex";
+    }
 }
 
 function hideButton() {
-    document.querySelector(".icon.black.down111").style.display = "none";
+    const button = document.querySelector(".icon.black.down111");
+    if (button) {
+        button.style.display = "none";
+    }
 }
 
 function checkScrollPosition() {
@@ -42,10 +56,25 @@ window.addEventListener("scroll", checkScrollPosition);
 checkScrollPosition();
 
 // 绑定点击事件
-document.querySelector(".icon.black.down111").addEventListener("click", scrollToBottom);
+const downButton = document.querySelector(".icon.black.down111");
+if (downButton) {
+    downButton.addEventListener("click", scrollToBottom);
+}
 
-document.querySelector(".icon.black.other_com").addEventListener("click", guideButton);
+const otherComButton = document.querySelector(".icon.black.other_com");
+if (otherComButton) {
+    otherComButton.addEventListener("click", guideButton);
+}
 
+const backButton = document.querySelector(".icon.black.back");
+if (backButton) {
+    backButton.addEventListener("click", back_button);
+}
+
+const squareButton = document.querySelector(".icon.black.square");
+if (squareButton) {
+    squareButton.addEventListener("click", guideSquare);
+}
 
 // 绑定登录按钮事件
 var ele = document.querySelector(".login_button")

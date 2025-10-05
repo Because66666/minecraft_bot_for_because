@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Because的数据统计</title>
+    <script src="/static/js/tailwindcss.js"></script>
+    <link href="/static/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/button.css' ) }}">
+    <!-- Chart.js -->
+    <script src="/static/js/chart.umd.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a56db',
+                        secondary: '#e5edff',
+                        accent: '#ff6b00',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        card: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-transition {
+                transition: all 0.3s ease;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .gradient-bg {
+                background: linear-gradient(135deg, #1a56db 0%, #3b82f6 100%);
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans">
+    <div class="flex flex-col h-screen overflow-hidden">
+
+        <!-- 主内容区 -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- 顶部信息栏 -->
+            <header class="bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-lg">
+                <div class="px-4 sm:px-6 lg:px-8 py-4">
+                    <div class="flex flex-col space-y-2">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Because的数据统计</h1>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-500">数据更新日期：</span>
+                            <span id="update-date" class="ml-1 text-sm font-medium text-primary"></span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 主要内容 -->
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-50">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- 总发言数卡片 -->
+                    <div class="bg-white rounded-lg shadow-card p-6 card-transition hover:shadow-card-hover">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-full w-12 h-12 flex items-center justify-center">
+                                <i class="fa fa-comments text-primary text-xl"></i>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">昨日总发言数</dt>
+                                    <dd class="flex items-baseline">
+                                        <div class="text-2xl font-semibold text-gray-900" id="total-messages">0</div>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 活跃用户卡片 -->
+                    <div class="bg-white rounded-lg shadow-card p-6 card-transition hover:shadow-card-hover">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-full w-12 h-12 flex items-center justify-center">
+                                <i class="fa fa-users text-primary text-xl"></i>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">昨日活跃用户</dt>
+                                    <dd class="flex items-baseline">
+                                        <div class="text-2xl font-semibold text-gray-900" id="active-users">0</div>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 最高在线人数卡片 -->
+                    <div class="bg-white rounded-lg shadow-card p-6 card-transition hover:shadow-card-hover">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-full w-12 h-12 flex items-center justify-center">
+                                <i class="fa fa-signal text-primary text-xl"></i>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">昨日最高在线人数</dt>
+                                    <dd class="flex items-baseline">
+                                        <div class="text-2xl font-semibold text-gray-900" id="peak-online">0</div>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- 昨日发言排行榜前五 -->
+                    <div class="bg-white rounded-lg shadow-card p-6 card-transition hover:shadow-card-hover">
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">昨日发言排行榜前五</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <span class="text-yellow-600 font-medium">1</span>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-900" id="rank-1-name">-</p>
+                                        <p class="text-sm font-medium text-primary" id="rank-1-count">0</p>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                        <div class="bg-primary h-1.5 rounded-full" id="rank-1-bar" style="width: 0%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <span class="text-gray-600 font-medium">2</span>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-900" id="rank-2-name">-</p>
+                                        <p class="text-sm font-medium text-primary" id="rank-2-count">0</p>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                        <div class="bg-primary h-1.5 rounded-full" id="rank-2-bar" style="width: 0%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                    <span class="text-orange-600 font-medium">3</span>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-900" id="rank-3-name">-</p>
+                                        <p class="text-sm font-medium text-primary" id="rank-3-count">0</p>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                        <div class="bg-primary h-1.5 rounded-full" id="rank-3-bar" style="width: 0%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <span class="text-gray-600 font-medium">4</span>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-900" id="rank-4-name">-</p>
+                                        <p class="text-sm font-medium text-primary" id="rank-4-count">0</p>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                        <div class="bg-primary h-1.5 rounded-full" id="rank-4-bar" style="width: 0%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <span class="text-gray-600 font-medium">5</span>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-900" id="rank-5-name">-</p>
+                                        <p class="text-sm font-medium text-primary" id="rank-5-count">0</p>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                        <div class="bg-primary h-1.5 rounded-full" id="rank-5-bar" style="width: 0%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 昨日服务器在线人数变化曲线 -->
+                    <div
+                        class="bg-white rounded-lg shadow-card p-6 card-transition hover:shadow-card-hover lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-medium text-gray-900">昨日服务器在线人数变化曲线</h2>
+                            <div class="flex items-center space-x-2">
+                                <button type="button"
+                                    class="text-sm text-gray-500 hover:text-primary focus:outline-none" id="zoom-out">
+                                    <i class="fa fa-search-minus"></i>
+                                </button>
+                                <button type="button"
+                                    class="text-sm text-gray-500 hover:text-primary focus:outline-none" id="zoom-in">
+                                    <i class="fa fa-search-plus"></i>
+                                </button>
+                                <button type="button"
+                                    class="text-sm text-gray-500 hover:text-primary focus:outline-none" id="reset-zoom">
+                                    <i class="fa fa-refresh"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="online-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 每个玩家昨日发言次数详细列表 -->
+                <div class="bg-white rounded-lg shadow-card overflow-hidden card-transition hover:shadow-card-hover">
+                    <div class="px-3 sm:px-6 py-4 border-b border-gray-200">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                            <h2 class="text-base sm:text-lg font-medium text-gray-900">每个玩家昨日发言次数</h2>
+                            <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                                <div class="relative">
+                                    <input type="text" id="search-input" placeholder="搜索玩家..."
+                                        class="w-full sm:w-auto pl-8 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <div class="absolute left-3 top-2.5 text-gray-400">
+                                        <i class="fa fa-search text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="w-full sm:w-auto">
+                                    <select id="sort-select"
+                                        class="w-full sm:w-auto pl-3 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        <option value="desc">发言次数从高到低</option>
+                                        <option value="asc">发言次数从低到高</option>
+                                        <option value="name">玩家名称A-Z</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5 sm:w-auto">
+                                        玩家名称</th>
+                                    <th scope="col"
+                                        class="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5 sm:w-auto">
+                                        发言次数</th>
+                                    <th scope="col"
+                                        class="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5 sm:w-auto">
+                                        占比</th>
+                                    <th scope="col"
+                                        class="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5 sm:w-auto">
+                                        排名</th>
+                                </tr>
+                            </thead>
+                            <tbody id="player-table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- 玩家数据将通过JavaScript动态填充 -->
+                                <tr>
+                                    <td colspan="4" class="px-3 sm:px-6 py-4 text-center text-sm text-gray-500">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            显示 <span id="showing-count">0</span> 条，共 <span id="total-count">0</span> 条
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button type="button"
+                                class="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:outline-none"
+                                id="prev-page" disabled>
+                                <i class="fa fa-chevron-left"></i>
+                            </button>
+                            <button type="button"
+                                class="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:outline-none"
+                                id="next-page">
+                                <i class="fa fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <ul class="wrapper scrollToBottomBtn">
+        <li class="icon black back">
+            <div style="opacity: 1; transform: none;">
+                <button
+                    class="flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl"
+                    tabindex="0"
+                    style="background-color: rgb(230, 242, 255); border: 2px solid rgb(133, 184, 232); transform: none;">
+                    <div style="color: rgb(0, 0, 0);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path fill="currentColor"
+                                d="m7.825 13l4.9 4.9q.3.3.288.7t-.313.7q-.3.275-.7.288t-.7-.288l-6.6-6.6q-.15-.15-.213-.325T4.426 12t.063-.375t.212-.325l6.6-6.6q.275-.275.688-.275t.712.275q.3.3.3.713t-.3.712L7.825 11H19q.425 0 .713.288T20 12t-.288.713T19 13z" />
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </li>
+    </ul>
+    <script>
+        // 全局变量
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let filteredPlayers = [];
+        let zoomLevel = 1;
+        let onlineChart = null;
+        let dashboardData = null;
+        let onlineData = [];
+        let playersData = [];
+
+        // DOM元素
+        const updateDateEl = document.getElementById('update-date');
+        const totalMessagesEl = document.getElementById('total-messages');
+        const activeUsersEl = document.getElementById('active-users');
+        const peakOnlineEl = document.getElementById('peak-online');
+        const playerTableBody = document.getElementById('player-table-body');
+        const showingCountEl = document.getElementById('showing-count');
+        const totalCountEl = document.getElementById('total-count');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const searchInput = document.getElementById('search-input');
+        const sortSelect = document.getElementById('sort-select');
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        const resetZoomBtn = document.getElementById('reset-zoom');
+
+        // 从API获取数据
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch('/square/dashboard/api');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                
+                if (result.status === 0 && result.data) {
+                    return result.data;
+                } else {
+                    throw new Error(result.message || '获取数据失败');
+                }
+            } catch (error) {
+                console.error('获取仪表板数据失败:', error);
+                // 显示错误信息给用户
+                showErrorMessage('数据加载失败，请刷新页面重试');
+                return null;
+            }
+        }
+
+        // 显示错误信息
+        function showErrorMessage(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
+            errorDiv.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fa fa-exclamation-triangle mr-2"></i>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-red-700 hover:text-red-900">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(errorDiv);
+            
+            // 5秒后自动移除
+            setTimeout(() => {
+                if (errorDiv.parentElement) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // 处理API数据，转换为前端需要的格式
+        function processApiData(apiData) {
+            const { online_curve_data, player_chat_stats } = apiData;
+            
+            // 处理在线人数数据
+            onlineData = online_curve_data.hours.map((hour, index) => ({
+                hour: `${hour}:00`,
+                online: online_curve_data.online_counts[index]
+            }));
+
+            // 处理玩家数据
+            playersData = [];
+            const allPlayers = player_chat_stats.all_players;
+            
+            Object.entries(allPlayers).forEach(([playerName, messageCount]) => {
+                playersData.push({
+                    name: playerName,
+                    messages: messageCount,
+                    percentage: ((messageCount / player_chat_stats.total_messages) * 100).toFixed(2)
+                });
+            });
+
+            // 按发言次数排序
+            playersData.sort((a, b) => b.messages - a.messages);
+
+            // 添加排名
+            playersData.forEach((player, index) => {
+                player.rank = index + 1;
+            });
+
+            const processedData = {
+                date: apiData.date,
+                onlineData: onlineData,
+                playersData: playersData,
+                totalMessages: player_chat_stats.total_messages,
+                activeUsers: player_chat_stats.total_players,
+                peakOnline: online_curve_data.peak_count,
+                peakHour: online_curve_data.peak_hour,
+                totalUniqueOnlinePlayers: online_curve_data.total_unique_players,
+                averageMessages: player_chat_stats.average_messages_per_player
+            };
+
+            // 初始化页面数据
+            initializePage(processedData);
+
+            return processedData;
+        }
+
+        // 初始化页面数据
+        function initializePage(data) {
+            // 设置数据更新日期
+            updateDateEl.textContent = data.date;
+
+            // 设置总发言数
+            totalMessagesEl.textContent = data.totalMessages.toLocaleString();
+
+            // 设置活跃用户数
+            activeUsersEl.textContent = data.activeUsers.toLocaleString();
+
+            // 设置最高在线人数
+            peakOnlineEl.textContent = data.peakOnline.toLocaleString();
+
+            // 填充排行榜前五
+            for (let i = 0; i < 5; i++) {
+                if (data.playersData[i]) {
+                    const player = data.playersData[i];
+                    const nameElement = document.getElementById(`rank-${i + 1}-name`);
+                    
+                    // 清空之前的内容
+                    nameElement.innerHTML = '';
+                    
+                    // 添加玩家名称
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = player.name;
+                    nameElement.appendChild(nameSpan);
+                    
+                    // 如果是第一名，添加龙王标识
+                    if (i === 0) {
+                        // 添加SVG图标
+                        const svgIcon = document.createElement('img');
+                        svgIcon.src = '/static/svg/dragon.svg';
+                        svgIcon.style.width = '0.9em';
+                        svgIcon.style.height = '0.9em';
+                        svgIcon.style.marginLeft = '4px';
+                        svgIcon.style.display = 'inline-block';
+                        svgIcon.style.verticalAlign = 'middle';
+                        nameElement.appendChild(svgIcon);
+                        
+                        // 添加龙王标签
+                        const dragonTag = document.createElement('span');
+                        dragonTag.textContent = '龙王';
+                        dragonTag.className = 'inline-block ml-1 px-1.5 py-0.5 text-xs font-medium text-white bg-green-500 rounded';
+                        nameElement.appendChild(dragonTag);
+                    }
+                    
+                    document.getElementById(`rank-${i + 1}-count`).textContent = player.messages;
+
+                    // 计算进度条宽度，以第一名的发言数为100%
+                    const percentage = (player.messages / data.playersData[0].messages * 100).toFixed(0);
+                    document.getElementById(`rank-${i + 1}-bar`).style.width = `${percentage}%`;
+                } else {
+                    // 如果没有足够的玩家数据，显示空状态
+                    document.getElementById(`rank-${i + 1}-name`).textContent = '-';
+                    document.getElementById(`rank-${i + 1}-count`).textContent = '0';
+                    document.getElementById(`rank-${i + 1}-bar`).style.width = '0%';
+                }
+            }
+
+            // 初始化玩家列表
+            filteredPlayers = [...data.playersData];
+            
+            // 创建在线人数变化曲线图
+            createOnlineChart(data.onlineData);
+            
+            // 渲染玩家表格
+            renderPlayerTable();
+        }
+
+        // 创建在线人数变化曲线图
+        function createOnlineChart(onlineData) {
+            const ctx = document.getElementById('online-chart').getContext('2d');
+            
+            // 如果已存在图表，先销毁
+            if (onlineChart) {
+                onlineChart.destroy();
+            }
+            
+            onlineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: onlineData.map(item => item.hour),
+                    datasets: [{
+                        label: '在线人数',
+                        data: onlineData.map(item => item.online),
+                        borderColor: '#1a56db',
+                        backgroundColor: 'rgba(26, 86, 219, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#1a56db',
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1e293b',
+                            bodyColor: '#1e293b',
+                            borderColor: '#e2e8f0',
+                            borderWidth: 1,
+                            padding: 10,
+                            boxPadding: 5,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function (context) {
+                                    return `在线人数: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // 渲染玩家列表
+        function renderPlayerTable() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageItems = filteredPlayers.slice(startIndex, endIndex);
+
+            playerTableBody.innerHTML = '';
+
+            if (pageItems.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="4" class="px-3 sm:px-6 py-4 text-center text-sm text-gray-500">没有找到匹配的玩家</td>
+                `;
+                playerTableBody.appendChild(row);
+                showingCountEl.textContent = '0';
+            } else {
+                pageItems.forEach((player, index) => {
+                    const row = document.createElement('tr');
+                    row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                    row.innerHTML = `
+                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-6 w-6 sm:h-8 sm:w-8 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+                                    <span class="text-primary text-xs sm:text-sm font-medium">${player.name.charAt(2)}</span>
+                                </div>
+                                <div class="ml-2 sm:ml-4 min-w-0 flex-1">
+                                    <div class="text-xs sm:text-sm font-medium text-gray-900 truncate">${player.name}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-2 sm:px-6 py-4 whitespace-nowrap">
+                            <div class="text-xs sm:text-sm text-gray-900">${player.messages}</div>
+                        </td>
+                        <td class="px-2 sm:px-6 py-4 whitespace-nowrap">
+                            <div class="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
+                                <div class="bg-primary h-1.5 sm:h-2 rounded-full" style="width: ${Math.min(player.percentage * 2, 100)}%"></div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">${player.percentage}%</div>
+                        </td>
+                        <td class="px-2 sm:px-6 py-4 whitespace-nowrap">
+                            <span class="px-1 sm:px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getRankColorClass(player.rank)}">
+                                ${player.rank}
+                            </span>
+                        </td>`;
+                    playerTableBody.appendChild(row);
+                });
+
+                showingCountEl.textContent = pageItems.length;
+            }
+
+            totalCountEl.textContent = filteredPlayers.length;
+
+            // 更新分页按钮状态
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = endIndex >= filteredPlayers.length;
+        }
+
+        // 获取排名对应的颜色类
+        function getRankColorClass(rank) {
+            if (rank === 1) return 'bg-yellow-100 text-yellow-800';
+            if (rank === 2) return 'bg-gray-100 text-gray-800';
+            if (rank === 3) return 'bg-orange-100 text-orange-800';
+            return 'bg-gray-100 text-gray-800';
+        }
+
+        // 搜索玩家
+        function searchPlayers() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            if (searchTerm === '') {
+                filteredPlayers = [...playersData];
+            } else {
+                filteredPlayers = playersData.filter(player =>
+                    player.name.toLowerCase().includes(searchTerm)
+                );
+            }
+            currentPage = 1;
+            renderPlayerTable();
+        }
+
+        // 排序玩家
+        function sortPlayers() {
+            const sortBy = sortSelect.value;
+            switch (sortBy) {
+                case 'desc':
+                    filteredPlayers.sort((a, b) => b.messages - a.messages);
+                    break;
+                case 'asc':
+                    filteredPlayers.sort((a, b) => a.messages - b.messages);
+                    break;
+                case 'name':
+                    filteredPlayers.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+            }
+            renderPlayerTable();
+        }
+
+        // 分页功能
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPlayerTable();
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            const maxPage = Math.ceil(filteredPlayers.length / itemsPerPage);
+            if (currentPage < maxPage) {
+                currentPage++;
+                renderPlayerTable();
+            }
+        });
+
+        // 搜索功能
+        searchInput.addEventListener('input', searchPlayers);
+
+        // 排序功能
+        sortSelect.addEventListener('change', sortPlayers);
+
+        // 图表缩放功能
+        zoomInBtn.addEventListener('click', () => {
+            if (zoomLevel < 2) {
+                zoomLevel += 0.25;
+                updateChartZoom();
+            }
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            if (zoomLevel > 0.5) {
+                zoomLevel -= 0.25;
+                updateChartZoom();
+            }
+        });
+
+        resetZoomBtn.addEventListener('click', () => {
+            zoomLevel = 1;
+            updateChartZoom();
+        });
+
+        function updateChartZoom() {
+            if (!onlineData || onlineData.length === 0) return;
+            
+            const maxOnline = Math.max(...onlineData.map(item => item.online));
+            const minOnline = Math.min(...onlineData.map(item => item.online));
+            const range = maxOnline - minOnline;
+            const padding = range * (1 - zoomLevel) / 2;
+
+            onlineChart.options.scales.y.min = Math.max(0, Math.floor(minOnline - padding));
+            onlineChart.options.scales.y.max = Math.ceil(maxOnline + padding);
+            onlineChart.update();
+        }
+
+        // 初始化页面
+        async function initializeDashboard() {
+            // 获取仪表板数据
+            const data = await fetchDashboardData();
+            if (data) {
+                // 处理数据并初始化页面
+                processApiData(data);
+            } else {
+                // 如果没有数据，渲染空的玩家表格
+                renderPlayerTable();
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 初始化仪表板数据
+            await initializeDashboard();
+            
+            // 卡片淡入效果
+            const cards = document.querySelectorAll('.card-transition');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename= 'js/button.js' ) }}"></script>
+</body>
+</html>
